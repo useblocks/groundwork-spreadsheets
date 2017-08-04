@@ -43,6 +43,7 @@ Package content
 ---------------
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
 
-   contents/usage
+    contents/usage
+    contents/changelog
