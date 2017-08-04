@@ -16,3 +16,5 @@ For more information regarding groundwork, see `here <https://groundwork.readthe
     *   Auto detect columns by names
     *   Define column types
     *   Verify columns against the defined schema
+
+The full documentation is available at https://groundwork-spreadsheet.readthedocs.io/
