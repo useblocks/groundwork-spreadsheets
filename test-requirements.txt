@@ -1,0 +1,5 @@
+pytest
+pytest-runner
+pytest-flake8
+coverage
+python-coveralls

@@ -1,0 +1,1 @@
+from groundwork_users.patterns.gw_users_pattern.gw_users_pattern import GwUsersPattern
