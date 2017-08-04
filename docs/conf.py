@@ -140,7 +140,7 @@ html_theme_options = {
     "stickysidebar": True,
     "stickysidebarscrollable": False,
     "contribute": True,
-    "github_fork": "useblocks/groundwork-users",
+    "github_fork": "useblocks/groundwork-spreadsheets",
     "github_ribbon_color": "white_ffffff",
     "github_user": "useblocks",
 }
