@@ -13,9 +13,9 @@ install:
 script: tox
 deploy:
   provider: pypi
-  user: tbd
+  user: ub_marco
   password:
-    secure: "tbd"
+    secure: NJqy6Wz1F3UqoFgTFvGVAH/fI+wRXvZdoLDbmYwJnmfCo4MBoReoRy1Wd9T4xNxl4HZqd01pfDGZxdUTdmeucreKpB1ixDhyOGQIw2x0+Cd5M6hSU3c/bm8JBGq+a1ejyU4GqcZSt+UHoDS4V8OYahIeHgqvwiZbxa88YjjXI5q9tQevvCp3vIaFy7Q6loPdWib1tmzQ3XGppSm6Tbkl9hWaRyH0tc4HWL//NjrLGXwKPeluQ3H3kWUHY95pPNDKaF+qZF8brH8+gw06nDTr4ANh90ZXfv7Ue3airX7BwZO9jrBwz6vB10ngzfZJHJrjxJ0wwBr6tG/OvfxoDwUCVT1iE1OhvribQpHRimbDlOtYRoaWBVzlro5UI1e5O722u1AC1i1v+p3AUtAcYriCzWbj0n6HjDI/ilulYA/AUkzIiZMogIK+slciouChSD2PqwMkycqm/xPQ+BdVl5t+LhQXb3BNELEywyrX2ANkoF2H+1KDQLBr7DO+YFbLlBdE8kPJpCsiHao9PeDRTU0ClxMo2QsKAFGZp7YzG2hhFrM1RXh2VSxTFfcxL1P8EWlmbU3gUcKV9nKgZZEbf//3V9GO66yYBigU6W4x8X5N8cK3nNvtDjANGb+pAFkSaU4wbgqO80K70B9bQUYx2M6upIZG3PIBmsFRpjKT702CUgY=
   on:
     tags: true
     distributions: sdist bdist_wheel
