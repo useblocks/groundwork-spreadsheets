@@ -1,0 +1,169 @@
+{
+    "id": "#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "description": "Schema for excel configuration description",
+    "type": "object",
+    "required": ["path", "sheet_name", "header_row", "data_start_row", "column_config"],
+    "properties": {
+        "path": {
+            "type": "string"
+        },
+        "sheet_name": {
+            "type": "string"
+        },
+        "header_row": {
+            "type": "integer",
+            "minimum": 1
+        },
+        "column_search_config": {
+            "type": "object",
+            "required": ["first_column", "last_column"],
+            "properties": {
+                "first_column": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "last_column": {
+                    "oneOf": [
+                        {"$ref": "#/properties/column_search_config/definitions/automatic"},
+                        {"$ref": "#/properties/column_search_config/definitions/severalEmptyCells"},
+                        {"$ref": "#/properties/column_search_config/definitions/manual"}
+                    ]
+                }
+            },
+            "definitions": {
+                "automatic": {
+                    "properties": {
+                        "search_type": {
+                            "enum": ["automatic"]
+                        }
+                    },
+                    "required": ["search_type"],
+                    "additionalProperties": false
+                },
+                "severalEmptyCells": {
+                    "properties": {
+                        "search_type": {
+                            "enum": ["severalEmptyCells"]
+                        },
+                        "empty_cells_count": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    },
+                    "required": ["search_type", "empty_cells_count"],
+                    "additionalProperties": false
+                },
+                "manual": {
+                    "properties": {
+                        "search_type": {
+                            "enum": ["manual"]
+                        },
+                        "column_number": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    },
+                    "required": ["search_type", "column_number"],
+                    "additionalProperties": false
+                }
+            }
+        },
+        "data_start_row": {
+            "type": "integer",
+            "minimum": 2
+        },
+        "column_config": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "required": ["header", "type"],
+                "properties": {
+                    "header": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "oneOf": [
+                            {"$ref": "#/properties/column_config/definitions/date"},
+                            {"$ref": "#/properties/column_config/definitions/enum"},
+                            {"$ref": "#/properties/column_config/definitions/float"},
+                            {"$ref": "#/properties/column_config/definitions/integer"},
+                            {"$ref": "#/properties/column_config/definitions/string"}
+                        ]
+                    }
+                }
+            },
+            "definitions": {
+                "date": {
+                    "properties": {
+                        "base": {
+                            "enum": ["date"]
+                        }
+                    },
+                    "required": ["base"],
+                    "additionalProperties": false
+                },
+                "enum": {
+                    "properties": {
+                        "base": {
+                            "enum": ["enum"]
+                        },
+                        "enum_values": {
+                            "type": "array",
+                            "minItems": 1,
+                            "items": {
+                                "type": "string"
+                            },
+                            "uniqueItems": true
+                        }
+                    },
+                    "required": ["base", "enum_values"],
+                    "additionalProperties": false
+                },
+                "float": {
+                    "properties": {
+                        "base": {
+                            "enum": ["float"]
+                        },
+                        "minimum": {
+                            "type": "number"
+                        },
+                        "maximum": {
+                            "type": "number"
+                        }
+                    },
+                    "required": ["base"],
+                    "additionalProperties": false
+                },
+                "integer": {
+                    "properties": {
+                        "base": {
+                            "enum": ["integer"]
+                        },
+                        "minimum": {
+                            "type": "integer"
+                        },
+                        "maximum": {
+                            "type": "integer"
+                        }
+                    },
+                    "required": ["base"],
+                    "additionalProperties": false
+                },
+                "string": {
+                    "properties": {
+                        "base": {
+                            "enum": ["string"]
+                        },
+                        "pattern": {
+                            "type": "string"
+                        }
+                    },
+                    "required": ["base"],
+                    "additionalProperties": false
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,44 @@
+{
+    "path": "test.xlsx",
+    "sheet_name": "Sheet1",
+    "header_row": 1,
+    "column_search_config": {
+        "first_column": 1,
+        "last_column": {
+            "search_type": "automatic"
+        }
+    },
+    "data_start_row": 2,
+    "column_config": [
+        {
+            "header": "DTC (Hex)",
+            "type": {
+                "base": "string",
+                "pattern": "^0x[A-F0-9]{6}$"
+            }
+        },
+        {
+            "header": "Ist-Vorgabe",
+            "type": {
+                "base": "enum",
+                "enum_values": [
+                    "Ja",
+                    "Nein"
+                ]
+            }
+        },
+        {
+            "header": "DTC (Dez)",
+            "type": {
+                "base": "integer",
+                "minimum": 0
+            }
+        },
+        {
+            "header": "Date",
+            "type": {
+                "base": "date"
+            }
+        }
+    ]
+}
