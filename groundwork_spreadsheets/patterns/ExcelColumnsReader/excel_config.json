@@ -1,17 +1,32 @@
 {
     "path": "test.xlsx",
-    "sheet_name": "Sheet1",
-    "header_row": 1,
-    "column_search_config": {
-        "first_column": 1,
-        "last_column": {
+    "sheet_config": {
+        "search_type": "byName",
+        "name": "Sheet1"
+    },
+    "headers_index_config": {
+        "row_index": {
+            "search_type": "byIndex",
+            "index": 1
+        },
+        "column_index": {
             "search_type": "automatic"
         }
     },
-    "data_start_row": 2,
-    "column_config": [
+    "data_index_config": {
+        "row_index": {
+            "search_type": "byIndex",
+            "index": 2
+        },
+        "column_index": {
+            "search_type": "severalEmptyCells"
+        }
+    },
+    "data_type_config": [
         {
             "header": "DTC (Hex)",
+            "fail_on_type_error": true,
+            "fail_on_empty_cell": true,
             "type": {
                 "base": "string",
                 "pattern": "^0x[A-F0-9]{6}$"
@@ -19,6 +34,8 @@
         },
         {
             "header": "Ist-Vorgabe",
+            "fail_on_type_error": true,
+            "fail_on_empty_cell": true,
             "type": {
                 "base": "enum",
                 "enum_values": [
@@ -36,6 +53,8 @@
         },
         {
             "header": "Date",
+            "fail_on_type_error": true,
+            "fail_on_empty_cell": true,
             "type": {
                 "base": "date"
             }
