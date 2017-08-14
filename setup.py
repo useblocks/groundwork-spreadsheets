@@ -26,7 +26,7 @@ setup(
     platforms='any',
     setup_requires=[],
     tests_require=[],
-    install_requires=['groundwork>=0.1.10', 'openpyxl'],
+    install_requires=['groundwork>=0.1.10', 'openpyxl', 'jsonschema'],
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Console',
