@@ -43,47 +43,58 @@ class ExcelValidationPlugin:
         self.excel_config = self._validate_json(excel_config_json_path)
 
         # Check config: headers_index_config and data_index_config
-        headers_index_config_row = self.excel_config['headers_index_config']['row_index']
-        headers_index_config_column = self.excel_config['headers_index_config']['column_index']
-        data_index_config_row = self.excel_config['data_index_config']['row_index']
-        data_index_config_column = self.excel_config['data_index_config']['column_index']
+        orientation = self.excel_config['orientation']
+        headers_index_config_row_first = self.excel_config['headers_index_config']['row_index']['first']
+        headers_index_config_row_last = self.excel_config['headers_index_config']['row_index']['last']
+        headers_index_config_column_first = self.excel_config['headers_index_config']['column_index']['first']
+        headers_index_config_column_last = self.excel_config['headers_index_config']['column_index']['last']
+        data_index_config_row_first = self.excel_config['data_index_config']['row_index']['first']
+        data_index_config_row_last = self.excel_config['data_index_config']['row_index']['last']
+        data_index_config_column_first = self.excel_config['data_index_config']['column_index']['first']
+        data_index_config_column_last = self.excel_config['data_index_config']['column_index']['last']
 
-        # Check if exactly one of row_index or column_index is of type byIndex
-        error_msg = "One of headers_index_config (row_index, column_index) must be of type 'byIndex'."
-        if headers_index_config_row in ['automatic', 'severalEmptyCells'] and headers_index_config_column != 'byIndex':
-            self._plugin.log.error(error_msg)
-            raise ValueError(error_msg)
+        header_matrix = ()
+        data_matrix = ()
 
-        if headers_index_config_column in ['automatic', 'severalEmptyCells'] and headers_index_config_row != 'byIndex':
-            self._plugin.log.error(error_msg)
-            raise ValueError(error_msg)
-
-        error_msg = "One of data_index_config (row_index, column_index) must be of type 'byIndex'."
-        if data_index_config_row in ['automatic', 'severalEmptyCells'] and data_index_config_column != 'byIndex':
-            self._plugin.log.error(error_msg)
-            raise ValueError(error_msg)
-
-        if data_index_config_column in ['automatic', 'severalEmptyCells'] and data_index_config_row != 'byIndex':
-            self._plugin.log.error(error_msg)
-            raise ValueError(error_msg)
-
-        # Check if users put in a 1x1 matrix for headers
-        if headers_index_config_row == 'byIndex' and headers_index_config_column == 'byIndex':
-            self._plugin.log.warn("Both headers_index_config (row_index, column_index) are set to byIndex. That means"
-                                  "only one row or column is chosen (depending on the data_index_config).")
-
-        # Check if headers and data both have byIndex in the same direction (row or column)
-        if headers_index_config_row == 'byIndex' and data_index_config_row != 'byIndex':
-            error_msg = "If headers_index_config (row_index) is type 'byIndex', then data_index_config (row_index) " \
-                        "must also be of type 'byIndex'."
-            self._plugin.log.error(error_msg)
-            raise ValueError(error_msg)
-
-        if headers_index_config_column == 'byIndex' and data_index_config_column != 'byIndex':
-            error_msg = "If headers_index_config (column_index) is type 'byIndex', then data_index_config " \
-                        "(column_index) must also be of type 'byIndex'."
-            self._plugin.log.error(error_msg)
-            raise ValueError(error_msg)
+        if orientation == 'column_based':
+            if type(headers_index_config_row_first) != int:
+                self._raise_value_error("Row based orientation: The headers_index_config -> row_index -> first "
+                                        "must be of type integer.")
+            else:
+                # type is int
+                if type(headers_index_config_row_last) == int:
+                    if headers_index_config_row_last != headers_index_config_row_first:
+                        self._raise_value_error("Column based orientation: Grouped headers are not yet supported. "
+                                                "First and last header row must be equal.")
+                else:
+                    if headers_index_config_row_last == "automatic":
+                        # The automatism is to set the last row to the first row
+                        headers_index_config_row_last = headers_index_config_row_first
+                    else:
+                        # The user passed severalEmptyCells
+                        self._raise_value_error("Column based orientation: Grouped headers are not yet supported. "
+                                                "First and last header row must be equal or last row must be set to "
+                                                "'automatic'.")
+        else:
+            # orientation is 'row_based'
+            if type(headers_index_config_column_first) != int:
+                self._raise_value_error("Row based orientation: The headers_index_config -> column_index -> first "
+                                        "must be of type integer.")
+            else:
+                # type is int
+                if type(headers_index_config_column_last) == int:
+                    if headers_index_config_column_last != headers_index_config_column_first:
+                        self._raise_value_error("Row based orientation: Grouped headers are not yet supported. "
+                                                "First and last header column must be equal.")
+                else:
+                    if headers_index_config_column_last == "automatic":
+                        # The automatism is to set the last column to the first column
+                        headers_index_config_column_last = headers_index_config_column_first
+                    else:
+                        # The user passed severalEmptyCells
+                        self._raise_value_error("Row based orientation: Grouped headers are not yet supported. "
+                                                "First and last header column must be equal or last column must be "
+                                                "set to 'automatic'.")
 
         # Check if data index is larger than header index
 
@@ -164,3 +175,7 @@ class ExcelValidationPlugin:
             # This cannot happen if json validation was ok
             pass
         return ws
+
+    def _raise_value_error(self, msg):
+        self._plugin.log.error(msg)
+        raise ValueError(msg)

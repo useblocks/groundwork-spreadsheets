@@ -3,7 +3,7 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "description": "Schema for spreadsheet configuration description",
     "type": "object",
-    "required": ["headers_index_config", "data_index_config", "data_type_config"],
+    "required": ["orientation", "headers_index_config", "data_index_config", "data_type_config"],
     "additionalProperties": false,
     "properties": {
         "sheet_config": {
@@ -69,6 +69,10 @@
                 }
             }
         },
+        "orientation": {
+            "type": "string",
+            "pattern": "^column_based|row_based$"
+        },
         "headers_index_config": {
             "type": "object",
             "required": ["row_index", "column_index"],
@@ -92,12 +96,12 @@
                 "first": {
                     "type": ["integer", "string"],
                     "minimum": 1,
-                    "pattern": "^(automatic|severalEmptyCells:[0-9]+)$"
+                    "pattern": "^automatic|severalEmptyCells:[0-9]+$"
                 },
                 "last": {
                     "type": ["integer", "string"],
                     "minimum": 1,
-                    "pattern": "^(automatic|severalEmptyCells:[0-9]+)$"
+                    "pattern": "^automatic|severalEmptyCells:[0-9]+$"
                 }
             }
         },
