@@ -1,0 +1,7 @@
+global-exclude *.pyc
+global-exclude __pycache__
+
+include groundwork_spreadsheets/patterns/ExcelValidationPattern/assets/excel_config_schema.json
+
+prune docs/_build
+prune docs/_themes
