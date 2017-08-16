@@ -157,11 +157,9 @@
                 "required": ["header"],
                 "additionalProperties": false,
                 "properties": {
-                    "header": {
-                        "type": "string"
-                    },
-                    "fail_on_type_error": "bool",
-                    "fail_on_empty_cell": "bool",
+                    "header": {"type": "string"},
+                    "fail_on_type_error": {"type": "boolean"},
+                    "fail_on_empty_cell": {"type": "boolean"},
                     "type": {
                         "oneOf": [
                             {"$ref": "#/properties/data_type_config/definitions/automatic"},
