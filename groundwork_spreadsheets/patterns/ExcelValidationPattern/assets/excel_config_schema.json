@@ -73,77 +73,32 @@
             "type": "object",
             "required": ["row_index", "column_index"],
             "properties": {
-                "row_index": {
-                    "oneOf": [
-                        {"$ref": "#/properties/definitions_index_search/automatic"},
-                        {"$ref": "#/properties/definitions_index_search/byIndex"},
-                        {"$ref": "#/properties/definitions_index_search/severalEmptyCells"}
-                    ]
-                },
-                "column_index": {
-                    "oneOf": [
-                        {"$ref": "#/properties/definitions_index_search/automatic"},
-                        {"$ref": "#/properties/definitions_index_search/byIndex"},
-                        {"$ref": "#/properties/definitions_index_search/severalEmptyCells"}
-                    ]
-                }
+                "row_index": {"$ref": "#/properties/definitions_index"},
+                "column_index": {"$ref": "#/properties/definitions_index"}
             }
         },
         "data_index_config": {
             "type": "object",
             "required": ["row_index", "column_index"],
             "properties": {
-                "row_index": {
-                    "oneOf": [
-                        {"$ref": "#/properties/definitions_index_search/automatic"},
-                        {"$ref": "#/properties/definitions_index_search/byIndex"},
-                        {"$ref": "#/properties/definitions_index_search/severalEmptyCells"}
-                    ]
-                },
-                "column_index": {
-                    "oneOf": [
-                        {"$ref": "#/properties/definitions_index_search/automatic"},
-                        {"$ref": "#/properties/definitions_index_search/byIndex"},
-                        {"$ref": "#/properties/definitions_index_search/severalEmptyCells"}
-                    ]
-                }
+                "row_index": {"$ref": "#/properties/definitions_index"},
+                "column_index": {"$ref": "#/properties/definitions_index"}
             }
         },
-        "definitions_index_search": {
-            "automatic": {
-                "properties": {
-                    "search_type": {
-                        "enum": ["automatic"]
-                    }
+        "definitions_index": {
+            "type": "object",
+            "required": ["first", "last"],
+            "properties": {
+                "first": {
+                    "type": ["integer", "string"],
+                    "minimum": 1,
+                    "pattern": "^(automatic|severalEmptyCells:[0-9]+)$"
                 },
-                "required": ["search_type"],
-                "additionalProperties": false
-            },
-            "byIndex": {
-                "properties": {
-                    "search_type": {
-                        "enum": ["byIndex"]
-                    },
-                    "index": {
-                        "type": "integer",
-                        "minimum": 1
-                    }
-                },
-                "required": ["search_type", "index"],
-                "additionalProperties": false
-            },
-            "severalEmptyCells": {
-                "properties": {
-                    "search_type": {
-                        "enum": ["severalEmptyCells"]
-                    },
-                    "empty_cells_count": {
-                        "type": "integer",
-                        "minimum": 1
-                    }
-                },
-                "required": ["search_type", "empty_cells_count"],
-                "additionalProperties": false
+                "last": {
+                    "type": ["integer", "string"],
+                    "minimum": 1,
+                    "pattern": "^(automatic|severalEmptyCells:[0-9]+)$"
+                }
             }
         },
         "data_type_config": {
