@@ -35,15 +35,61 @@ class ExcelValidationPlugin:
         """
         self._plugin = plugin
         self._app = plugin.app
+        self.excel_config = None
 
     def read_excel(self, excel_config_json_path, excel_workbook_path):
 
         # The exceptions raised in this method shall be raised to the plugin level
-        excel_config = self._validate_json(excel_config_json_path, json_schema_file_path)
+        self.excel_config = self._validate_json(excel_config_json_path)
+
+        # Check config: headers_index_config and data_index_config
+        headers_index_config_row = self.excel_config['headers_index_config']['row_index']
+        headers_index_config_column = self.excel_config['headers_index_config']['column_index']
+        data_index_config_row = self.excel_config['data_index_config']['row_index']
+        data_index_config_column = self.excel_config['data_index_config']['column_index']
+
+        # Check if exactly one of row_index or column_index is of type byIndex
+        error_msg = "One of headers_index_config (row_index, column_index) must be of type 'byIndex'."
+        if headers_index_config_row in ['automatic', 'severalEmptyCells'] and headers_index_config_column != 'byIndex':
+            self._plugin.log.error(error_msg)
+            raise ValueError(error_msg)
+
+        if headers_index_config_column in ['automatic', 'severalEmptyCells'] and headers_index_config_row != 'byIndex':
+            self._plugin.log.error(error_msg)
+            raise ValueError(error_msg)
+
+        error_msg = "One of data_index_config (row_index, column_index) must be of type 'byIndex'."
+        if data_index_config_row in ['automatic', 'severalEmptyCells'] and data_index_config_column != 'byIndex':
+            self._plugin.log.error(error_msg)
+            raise ValueError(error_msg)
+
+        if data_index_config_column in ['automatic', 'severalEmptyCells'] and data_index_config_row != 'byIndex':
+            self._plugin.log.error(error_msg)
+            raise ValueError(error_msg)
+
+        # Check if users put in a 1x1 matrix for headers
+        if headers_index_config_row == 'byIndex' and headers_index_config_column == 'byIndex':
+            self._plugin.log.warn("Both headers_index_config (row_index, column_index) are set to byIndex. That means"
+                                  "only one row or column is chosen (depending on the data_index_config).")
+
+        # Check if headers and data both have byIndex in the same direction (row or column)
+        if headers_index_config_row == 'byIndex' and data_index_config_row != 'byIndex':
+            error_msg = "If headers_index_config (row_index) is type 'byIndex', then data_index_config (row_index) " \
+                        "must also be of type 'byIndex'."
+            self._plugin.log.error(error_msg)
+            raise ValueError(error_msg)
+
+        if headers_index_config_column == 'byIndex' and data_index_config_column != 'byIndex':
+            error_msg = "If headers_index_config (column_index) is type 'byIndex', then data_index_config " \
+                        "(column_index) must also be of type 'byIndex'."
+            self._plugin.log.error(error_msg)
+            raise ValueError(error_msg)
+
+        # Check if data index is larger than header index
 
         wb = openpyxl.load_workbook(excel_workbook_path, data_only=True)
 
-        ws = self._get_sheet(excel_config, wb)
+        ws = self._get_sheet(wb)
 
         print(ws.max_row)
         print(ws.max_column)
@@ -57,7 +103,7 @@ class ExcelValidationPlugin:
 
         return {}
 
-    def _validate_json(self, excel_config_json_path, json_schema_file_path):
+    def _validate_json(self, excel_config_json_path):
 
         try:
             with open(excel_config_json_path) as f:
@@ -100,18 +146,19 @@ class ExcelValidationPlugin:
 
         return json_obj
 
-    def _get_sheet(self, excel_config, wb):
+    def _get_sheet(self, wb):
 
         # get sheet
-        if excel_config['sheet_config']['search_type'] == 'active':
+        ws = None
+        if self.excel_config['sheet_config']['search_type'] == 'active':
             ws = wb.active
-        elif excel_config['sheet_config']['search_type'] == 'byIndex':
-            ws = wb.worksheets[excel_config['sheet_config']['index'] - 1]
-        elif excel_config['sheet_config']['search_type'] == 'byName':
-            ws = wb[excel_config['sheet_config']['name']]
-        elif excel_config['sheet_config']['search_type'] == 'first':
+        elif self.excel_config['sheet_config']['search_type'] == 'byIndex':
+            ws = wb.worksheets[self.excel_config['sheet_config']['index'] - 1]
+        elif self.excel_config['sheet_config']['search_type'] == 'byName':
+            ws = wb[self.excel_config['sheet_config']['name']]
+        elif self.excel_config['sheet_config']['search_type'] == 'first':
             ws = wb.worksheets[0]
-        elif excel_config['sheet_config']['search_type'] == 'last':
+        elif self.excel_config['sheet_config']['search_type'] == 'last':
             ws = wb.worksheets[len(wb.get_sheet_names())-1]
         else:
             # This cannot happen if json validation was ok
