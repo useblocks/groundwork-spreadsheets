@@ -1,6 +1,5 @@
-import os
-
 import pytest
+
 from tests.conftest import EmptyPlugin, _get_test_data_path
 
 

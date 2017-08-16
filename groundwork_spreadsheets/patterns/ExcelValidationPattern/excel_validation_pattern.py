@@ -45,8 +45,6 @@ class ExcelValidationPlugin:
 
         ws = self._get_sheet(excel_config, wb)
 
-
-
         print(ws.max_row)
         print(ws.max_column)
         print(ws.dimensions)
