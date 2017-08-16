@@ -3,6 +3,7 @@
         "search_type": "byIndex",
         "index": 2
     },
+    "orientation": "column_based",
     "headers_index_config": {
         "row_index": {
             "first": 1,
