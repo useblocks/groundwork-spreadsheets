@@ -1,8 +1,6 @@
 {
-    "path": "test.xlsx",
     "sheet_config": {
-        "search_type": "byName",
-        "name": "Sheet1"
+        "search_type": "first"
     },
     "headers_index_config": {
         "row_index": {

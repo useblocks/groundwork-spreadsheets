@@ -1,0 +1,62 @@
+{
+    "sheet_config": {
+        "search_type": "last"
+    },
+    "headers_index_config": {
+        "row_index": {
+            "search_type": "byIndex",
+            "index": 1
+        },
+        "column_index": {
+            "search_type": "automatic"
+        }
+    },
+    "data_index_config": {
+        "row_index": {
+            "search_type": "byIndex",
+            "index": 2
+        },
+        "column_index": {
+            "search_type": "severalEmptyCells",
+            "empty_cells_count": 3
+        }
+    },
+    "data_type_config": [
+        {
+            "header": "DTC (Hex)",
+            "fail_on_type_error": true,
+            "fail_on_empty_cell": true,
+            "type": {
+                "base": "string",
+                "pattern": "^0x[A-F0-9]{6}$"
+            }
+        },
+        {
+            "header": "Ist-Vorgabe",
+            "fail_on_type_error": true,
+            "fail_on_empty_cell": true,
+            "type": {
+                "base": "enum",
+                "enum_values": [
+                    "Ja",
+                    "Nein"
+                ]
+            }
+        },
+        {
+            "header": "DTC (Dez)",
+            "type": {
+                "base": "integer",
+                "minimum": 0
+            }
+        },
+        {
+            "header": "Date",
+            "fail_on_type_error": true,
+            "fail_on_empty_cell": true,
+            "type": {
+                "base": "date"
+            }
+        }
+    ]
+}
