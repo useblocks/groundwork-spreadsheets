@@ -19,7 +19,8 @@
             "index": 2
         },
         "column_index": {
-            "search_type": "severalEmptyCells"
+            "search_type": "severalEmptyCells",
+            "empty_cells_count": 3
         }
     },
     "data_type_config": [
