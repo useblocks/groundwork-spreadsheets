@@ -4,21 +4,22 @@
     },
     "headers_index_config": {
         "row_index": {
-            "search_type": "byIndex",
-            "index": 1
+            "first": 1,
+            "last": "automatic"
         },
         "column_index": {
-            "search_type": "automatic"
+            "first": "automatic",
+            "last": "automatic"
         }
     },
     "data_index_config": {
         "row_index": {
-            "search_type": "byIndex",
-            "index": 2
+            "first": 2,
+            "last": "automatic"
         },
         "column_index": {
-            "search_type": "severalEmptyCells",
-            "empty_cells_count": 3
+            "first": "automatic",
+            "last": "automatic"
         }
     },
     "data_type_config": [
