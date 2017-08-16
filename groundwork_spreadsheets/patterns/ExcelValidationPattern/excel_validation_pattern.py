@@ -41,12 +41,11 @@ class ExcelValidationPlugin:
         # The exceptions raised in this method shall be raised to the plugin level
         excel_config = self._validate_json(excel_config_json_path, json_schema_file_path)
 
-        # TODO Workbook not found exception
         wb = openpyxl.load_workbook(excel_workbook_path, data_only=True)
 
         ws = self._get_sheet(excel_config, wb)
 
-        # TODO Workbook not found exception
+
 
         print(ws.max_row)
         print(ws.max_column)
@@ -109,7 +108,7 @@ class ExcelValidationPlugin:
         if excel_config['sheet_config']['search_type'] == 'active':
             ws = wb.active
         elif excel_config['sheet_config']['search_type'] == 'byIndex':
-            ws = wb.worksheets[excel_config['sheet_config']['index']]
+            ws = wb.worksheets[excel_config['sheet_config']['index'] - 1]
         elif excel_config['sheet_config']['search_type'] == 'byName':
             ws = wb[excel_config['sheet_config']['name']]
         elif excel_config['sheet_config']['search_type'] == 'first':
@@ -118,6 +117,5 @@ class ExcelValidationPlugin:
             ws = wb.worksheets[len(wb.get_sheet_names())-1]
         else:
             # This cannot happen if json validation was ok
-            raise NotImplementedError("The sheet_config search type {0} is not implemented".format(
-                excel_config['sheet_config']))
+            pass
         return ws

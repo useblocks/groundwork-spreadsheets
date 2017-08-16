@@ -3,12 +3,9 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "description": "Schema for spreadsheet configuration description",
     "type": "object",
-    "required": ["path", "headers_index_config", "data_index_config", "data_type_config"],
+    "required": ["headers_index_config", "data_index_config", "data_type_config"],
     "additionalProperties": false,
     "properties": {
-        "path": {
-            "type": "string"
-        },
         "sheet_config": {
             "oneOf": [
                 {"$ref": "#/properties/sheet_config/definitions/active"},
