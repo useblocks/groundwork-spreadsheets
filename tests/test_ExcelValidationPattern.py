@@ -1,7 +1,4 @@
 import os
-import pytest
-from jsonschema.exceptions import ValidationError, SchemaError
-from pytest import fail
 
 from groundwork_spreadsheets import ExcelValidationPattern
 
