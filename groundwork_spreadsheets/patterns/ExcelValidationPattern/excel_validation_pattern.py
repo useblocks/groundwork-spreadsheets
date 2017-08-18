@@ -161,8 +161,8 @@ class ExcelValidationPlugin:
                         "Config error: header_index_config -> {0}_index -> last ({1}) is not equal to "
                         "data_index_config -> {0}_index -> last ({2}).".format(
                             oriented_column_text,
-                            oriented_headers_index_config_column_first,
-                            oriented_data_index_config_column_first
+                            oriented_headers_index_config_column_last,
+                            oriented_data_index_config_column_last
                         ))
 
         wb = openpyxl.load_workbook(excel_workbook_path, data_only=True)
@@ -180,9 +180,6 @@ class ExcelValidationPlugin:
         print(wb.get_sheet_names())
 
         return {}
-
-    def _get_coordinate(self, variable):
-        return variable if type(variable) == int else None
 
     def _validate_json(self, excel_config_json_path):
 
@@ -231,15 +228,15 @@ class ExcelValidationPlugin:
 
         # get sheet
         ws = None
-        if self.excel_config['sheet_config']['search_type'] == 'active':
+        if type(self.excel_config['sheet_config']) == int:
+            ws = wb.worksheets[self.excel_config['sheet_config'] - 1]
+        elif self.excel_config['sheet_config'] == 'active':
             ws = wb.active
-        elif self.excel_config['sheet_config']['search_type'] == 'byIndex':
-            ws = wb.worksheets[self.excel_config['sheet_config']['index'] - 1]
-        elif self.excel_config['sheet_config']['search_type'] == 'byName':
-            ws = wb[self.excel_config['sheet_config']['name']]
-        elif self.excel_config['sheet_config']['search_type'] == 'first':
+        elif self.excel_config['sheet_config'].startswith('name'):
+            ws = wb[self.excel_config['sheet_config'].split(':')[1]]
+        elif self.excel_config['sheet_config'] == 'first':
             ws = wb.worksheets[0]
-        elif self.excel_config['sheet_config']['search_type'] == 'last':
+        elif self.excel_config['sheet_config'] == 'last':
             ws = wb.worksheets[len(wb.get_sheet_names())-1]
         else:
             # This cannot happen if json validation was ok

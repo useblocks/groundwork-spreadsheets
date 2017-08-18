@@ -1,8 +1,5 @@
 {
-    "sheet_config": {
-        "search_type": "byIndex",
-        "index": 1
-    },
+    "sheet_config": 2,
     "orientation": "column_based",
     "headers_index_config": {
         "row_index": {
