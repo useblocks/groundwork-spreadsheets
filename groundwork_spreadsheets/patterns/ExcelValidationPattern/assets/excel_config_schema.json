@@ -7,67 +7,9 @@
     "additionalProperties": false,
     "properties": {
         "sheet_config": {
-            "oneOf": [
-                {"$ref": "#/properties/sheet_config/definitions/active"},
-                {"$ref": "#/properties/sheet_config/definitions/byIndex"},
-                {"$ref": "#/properties/sheet_config/definitions/byName"},
-                {"$ref": "#/properties/sheet_config/definitions/first"},
-                {"$ref": "#/properties/sheet_config/definitions/last"}
-            ],
-            "definitions": {
-                "active": {
-                    "properties": {
-                        "search_type": {
-                            "enum": ["active"]
-                        }
-                    },
-                    "required": ["search_type"],
-                    "additionalProperties": false
-                },
-                "byIndex": {
-                    "properties": {
-                        "search_type": {
-                            "enum": ["byIndex"]
-                        },
-                        "index": {
-                            "type": "integer",
-                            "minimum": 1
-                        }
-                    },
-                    "required": ["search_type", "index"],
-                    "additionalProperties": false
-                },
-                "byName": {
-                    "properties": {
-                        "search_type": {
-                            "enum": ["byName"]
-                        },
-                        "name": {
-                            "type": "string"
-                        }
-                    },
-                    "required": ["search_type", "name"],
-                    "additionalProperties": false
-                },
-                "first": {
-                    "properties": {
-                        "search_type": {
-                            "enum": ["first"]
-                        }
-                    },
-                    "required": ["search_type"],
-                    "additionalProperties": false
-                },
-                "last": {
-                    "properties": {
-                        "search_type": {
-                            "enum": ["last"]
-                        }
-                    },
-                    "required": ["search_type"],
-                    "additionalProperties": false
-                }
-            }
+            "type": ["integer", "string"],
+            "minimum": 1,
+            "pattern": "^active|name:.+|first|last$"
         },
         "orientation": {
             "type": "string",
