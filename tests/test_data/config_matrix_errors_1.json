@@ -23,7 +23,7 @@
     },
     "data_type_config": [
         {
-            "header": "do not care",
+            "header": "hex number",
             "fail_on_type_error": true,
             "fail_on_empty_cell": true,
             "type": {

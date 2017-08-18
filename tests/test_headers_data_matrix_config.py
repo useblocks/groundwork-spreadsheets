@@ -7,7 +7,7 @@ from tests.conftest import EmptyPlugin, _get_test_data_path
     'config_matrix_errors_1.json',
     'config_matrix_errors_2.json',
     'config_matrix_errors_3.json',
-    'config_matrix_errors_4.json',
+    'config_matrix_errors_4.json'
 ])
 def test_headers_data_indices_errors(emptyApp, config_json):
     plugin = EmptyPlugin(emptyApp)
