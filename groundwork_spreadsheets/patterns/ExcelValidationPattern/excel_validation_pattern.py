@@ -166,11 +166,27 @@ class ExcelValidationPlugin:
                             oriented_data_index_config_column_last
                         ))
 
+        # Set defaults for optional config values
+        if 'sheet_config' not in self.excel_config:
+            self.excel_config['sheet_config'] = 'active'
+
+        for data_type_config in self.excel_config['data_type_config']:
+            # default for possible problems should be strict if user tells nothing
+            if 'fail_on_type_error' not in data_type_config:
+                data_type_config['fail_on_type_error'] = True
+            if 'fail_on_empty_cell' not in data_type_config:
+                data_type_config['fail_on_empty_cell'] = True
+            if 'fail_on_header_not_found' not in data_type_config:
+                data_type_config['fail_on_header_not_found'] = True
+
+            # default type is automatic
+            if 'type' not in data_type_config:
+                data_type_config['type'] = {'base': 'automatic'}
+
         wb = openpyxl.load_workbook(excel_workbook_path, data_only=True)
 
         ws = self._get_sheet(wb)
 
-        # Read header row
         # Determine header row length
         if type(oriented_headers_index_config_column_last) == int:
             header_column_last = oriented_headers_index_config_column_last
@@ -190,6 +206,28 @@ class ExcelValidationPlugin:
             header_column_last -= target_empty_cell_count + 1
 
         # Determine header column locations
+        spreadsheet_headers2columns = {}
+        for column in range(oriented_headers_index_config_column_first, header_column_last):
+            value = ws[self._transform_coordinates(oriented_headers_index_config_row_first, column)].value
+            spreadsheet_headers2columns[value] = column
+        spreadsheet_headers = spreadsheet_headers2columns.keys()
+
+        # Check for not existing headers
+        config_headers = [x['header'] for x in self.excel_config['data_type_config']]
+        # Check: Are config data_type_config headers unique?
+        if len(config_headers) != len(set(config_headers)):
+            self._raise_value_error("Config error: data_type_config -> header duplicate entries found.")
+
+        missing_headers_in_spreadsheet = list(set(config_headers) - set(spreadsheet_headers))
+        for header in missing_headers_in_spreadsheet:
+            # Check if the fail_on_header_not_found is true
+            data_type = [x for x in self.excel_config['data_type_config'] if x['header'] == header][0]
+            if data_type['fail_on_header_not_found']:
+                self._raise_value_error("Config error: The header '{0}' could not be found in the spreadsheet.".format(
+                    header))
+
+        # Go through the rows and read the data
+        # final_dict = {}
 
         print(ws.max_row)
         print(ws.max_column)
