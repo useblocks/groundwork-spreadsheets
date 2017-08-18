@@ -6,6 +6,7 @@ import json
 import os
 
 import openpyxl
+from openpyxl.utils import get_column_letter
 from groundwork.patterns.gw_base_pattern import GwBasePattern
 from jsonschema import validate, ValidationError, SchemaError
 
@@ -169,6 +170,27 @@ class ExcelValidationPlugin:
 
         ws = self._get_sheet(wb)
 
+        # Read header row
+        # Determine header row length
+        if type(oriented_headers_index_config_column_last) == int:
+            header_column_last = oriented_headers_index_config_column_last
+        elif oriented_headers_index_config_column_last == 'automatic':
+            header_column_last = len(ws[self._transform_coordinates(oriented_headers_index_config_row_first)])
+        else:
+            # severalEmptyCells chosen
+            target_empty_cell_count = int(oriented_headers_index_config_column_last.split(':')[1])
+            empty_cell_count = 0
+            header_column_last = oriented_headers_index_config_column_first
+            while empty_cell_count < target_empty_cell_count:
+                value = ws[self._transform_coordinates(oriented_headers_index_config_row_first,
+                                                       header_column_last)].value
+                if value is None:
+                    empty_cell_count += 1
+                header_column_last += 1
+            header_column_last -= target_empty_cell_count + 1
+
+        # Determine header column locations
+
         print(ws.max_row)
         print(ws.max_column)
         print(ws.dimensions)
@@ -246,3 +268,19 @@ class ExcelValidationPlugin:
     def _raise_value_error(self, msg):
         self._plugin.log.error(msg)
         raise ValueError(msg)
+
+    def _transform_coordinates(self, row=None, column=None):
+        if row is None and column is None:
+            raise ValueError("_transform_coordinates: row and column cannot both be None.")
+        target_str = ''
+        if self.excel_config['orientation'] == 'column_based':
+            if column is not None:
+                target_str = get_column_letter(column)
+            if row is not None:
+                target_str += str(row)
+        else:
+            if row is not None:
+                target_str = get_column_letter(row)
+            if column is not None:
+                target_str += str(column)
+        return target_str
