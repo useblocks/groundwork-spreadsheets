@@ -58,6 +58,7 @@
                     "header": {"type": "string"},
                     "fail_on_type_error": {"type": "boolean"},
                     "fail_on_empty_cell": {"type": "boolean"},
+                    "fail_on_header_not_found": {"type": "boolean"},
                     "type": {
                         "oneOf": [
                             {"$ref": "#/properties/data_type_config/definitions/automatic"},
