@@ -38,7 +38,7 @@
                 "first": {
                     "type": ["integer", "string"],
                     "minimum": 1,
-                    "pattern": "^automatic|severalEmptyCells:[0-9]+$"
+                    "pattern": "^automatic$"
                 },
                 "last": {
                     "type": ["integer", "string"],
