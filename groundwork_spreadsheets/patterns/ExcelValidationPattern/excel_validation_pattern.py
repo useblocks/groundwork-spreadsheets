@@ -53,50 +53,117 @@ class ExcelValidationPlugin:
         data_index_config_column_first = self.excel_config['data_index_config']['column_index']['first']
         data_index_config_column_last = self.excel_config['data_index_config']['column_index']['last']
 
-        header_matrix = ()
-        data_matrix = ()
-
+        # rotate coordinates so we can work with virtually column_based all the time
         if orientation == 'column_based':
-            if type(headers_index_config_row_first) != int:
-                self._raise_value_error("Row based orientation: The headers_index_config -> row_index -> first "
-                                        "must be of type integer.")
-            else:
-                # type is int
-                if type(headers_index_config_row_last) == int:
-                    if headers_index_config_row_last != headers_index_config_row_first:
-                        self._raise_value_error("Column based orientation: Grouped headers are not yet supported. "
-                                                "First and last header row must be equal.")
-                else:
-                    if headers_index_config_row_last == "automatic":
-                        # The automatism is to set the last row to the first row
-                        headers_index_config_row_last = headers_index_config_row_first
-                    else:
-                        # The user passed severalEmptyCells
-                        self._raise_value_error("Column based orientation: Grouped headers are not yet supported. "
-                                                "First and last header row must be equal or last row must be set to "
-                                                "'automatic'.")
+            oriented_headers_index_config_row_first = headers_index_config_row_first
+            oriented_headers_index_config_row_last = headers_index_config_row_last
+            oriented_headers_index_config_column_first = headers_index_config_column_first
+            oriented_headers_index_config_column_last = headers_index_config_column_last
+            oriented_data_index_config_row_first = data_index_config_row_first
+            oriented_data_index_config_row_last = data_index_config_row_last
+            oriented_data_index_config_column_first = data_index_config_column_first
+            oriented_data_index_config_column_last = data_index_config_column_last
         else:
-            # orientation is 'row_based'
-            if type(headers_index_config_column_first) != int:
-                self._raise_value_error("Row based orientation: The headers_index_config -> column_index -> first "
-                                        "must be of type integer.")
-            else:
-                # type is int
-                if type(headers_index_config_column_last) == int:
-                    if headers_index_config_column_last != headers_index_config_column_first:
-                        self._raise_value_error("Row based orientation: Grouped headers are not yet supported. "
-                                                "First and last header column must be equal.")
-                else:
-                    if headers_index_config_column_last == "automatic":
-                        # The automatism is to set the last column to the first column
-                        headers_index_config_column_last = headers_index_config_column_first
-                    else:
-                        # The user passed severalEmptyCells
-                        self._raise_value_error("Row based orientation: Grouped headers are not yet supported. "
-                                                "First and last header column must be equal or last column must be "
-                                                "set to 'automatic'.")
+            # row_based layout
+            oriented_headers_index_config_row_first = headers_index_config_column_first
+            oriented_headers_index_config_row_last = headers_index_config_column_last
+            oriented_headers_index_config_column_first = headers_index_config_row_first
+            oriented_headers_index_config_column_last = headers_index_config_row_last
+            oriented_data_index_config_row_first = data_index_config_column_first
+            oriented_data_index_config_row_last = data_index_config_column_last
+            oriented_data_index_config_column_first = data_index_config_row_first
+            oriented_data_index_config_column_last = data_index_config_row_last
 
-        # Check if data index is larger than header index
+        oriented_row_text = "row" if orientation == 'column_based' else "column"
+        oriented_column_text = "column" if orientation == 'column_based' else "row"
+
+        # set defaults of headers_index_config
+        if type(oriented_headers_index_config_row_first) is not int:
+            # Assume the user wants to use the first row as header row
+            oriented_headers_index_config_row_first = 1
+            self._plugin.log.debug("Config update: Setting headers_index_config -> {0}_index -> first to 1".format(
+                oriented_row_text))
+
+        if type(oriented_headers_index_config_row_last) is not int:
+            # Only 1 header row is supported currently, set last header row to first header row
+            oriented_headers_index_config_row_last = oriented_headers_index_config_row_first
+            self._plugin.log.debug("Config update: Setting headers_index_config -> {0}_index -> last to {1}".format(
+                oriented_row_text, oriented_headers_index_config_row_first))
+
+        if type(oriented_headers_index_config_column_first) is not int:
+            # Assume the user wants to start at the first column
+            oriented_headers_index_config_column_first = 1
+            self._plugin.log.debug("Config update: Setting headers_index_config -> {0}_index -> first to 1".format(
+                oriented_column_text))
+
+        if type(oriented_headers_index_config_column_last) is not int:
+            if type(oriented_data_index_config_column_last) is int:
+                # We don't have a last column in the header config,
+                # so we use what we have in the data config
+                oriented_headers_index_config_column_last = oriented_data_index_config_column_last
+                self._plugin.log.debug("Config update: Setting headers_index_config -> {0}_index -> first to "
+                                       "{1}".format(oriented_column_text, oriented_headers_index_config_column_last))
+
+        # set defaults of data_index_config
+        if type(oriented_data_index_config_row_first) is not int:
+            # Assume the first data row is the next after oriented_headers_index_config_row_last
+            oriented_data_index_config_row_first = oriented_headers_index_config_row_last + 1
+            self._plugin.log.debug("Config update: Setting data_index_config -> {0}_index -> first to {1}".format(
+                oriented_row_text, oriented_data_index_config_row_first))
+
+        # oriented_data_index_config_row_last has no defaults - the user input is master
+
+        if type(oriented_data_index_config_column_first) is not int:
+            # Assume the first data column is equal to the first header column
+            oriented_data_index_config_column_first = oriented_headers_index_config_column_first
+            self._plugin.log.debug("Config update: Setting data_index_config -> {0}_index -> first to {1}".format(
+                oriented_column_text, oriented_data_index_config_column_first))
+
+        if type(oriented_data_index_config_column_last) is not int:
+            if type(oriented_headers_index_config_column_last) is int:
+                # We don't have a last column in the data config,
+                # so we use what we have in the header config
+                oriented_data_index_config_column_last = oriented_headers_index_config_column_last
+                self._plugin.log.debug("Config update: Setting data_index_config -> {0}_index -> last to "
+                                       "{1}".format(oriented_column_text, oriented_data_index_config_column_last))
+
+        # Some more logic checks on rows
+        if oriented_headers_index_config_row_last != oriented_headers_index_config_row_first:
+            # We can compare both because at this point they have to be integer
+            # Multi line headers given
+            self._raise_value_error("Config error: Multi line (grouped) headers are not yet supported. "
+                                    "First and last header {0} must be equal.".format(oriented_row_text))
+
+        if oriented_data_index_config_row_first <= oriented_headers_index_config_row_last:
+            # We can compare both because at this point they have to be integer
+            # The data section is above the header section
+            self._raise_value_error("Config error: headers_index_config -> {0}_index -> last is greater than "
+                                    "data_index_config -> {0}_index -> first.".format(oriented_row_text))
+
+        if type(oriented_data_index_config_row_last) is int:
+            if oriented_data_index_config_row_last < oriented_data_index_config_row_first:
+                # The last data row is smaller than the first
+                self._raise_value_error("Config error: data_index_config -> {0}_index -> first is greater than "
+                                        "data_index_config -> {0}_index -> last.".format(oriented_row_text))
+
+        # Some more logic checks on columns
+        if oriented_headers_index_config_column_first != oriented_data_index_config_column_first:
+            # We can compare both because at this point they have to be integer
+            # First column mismatch
+            self._raise_value_error("Config error: header_index_config -> {0}_index -> first is not equal to "
+                                    "data_index_config -> {0}_index -> first.".format(oriented_column_text))
+
+        if type(oriented_headers_index_config_column_last) is int:
+            if type(oriented_data_index_config_column_last) is int:
+                if oriented_headers_index_config_column_last != oriented_data_index_config_column_last:
+                    # Last columns are given but do not match
+                    self._raise_value_error(
+                        "Config error: header_index_config -> {0}_index -> last ({1}) is not equal to "
+                        "data_index_config -> {0}_index -> last ({2}).".format(
+                            oriented_column_text,
+                            oriented_headers_index_config_column_first,
+                            oriented_data_index_config_column_first
+                        ))
 
         wb = openpyxl.load_workbook(excel_workbook_path, data_only=True)
 
@@ -113,6 +180,9 @@ class ExcelValidationPlugin:
         print(wb.get_sheet_names())
 
         return {}
+
+    def _get_coordinate(self, variable):
+        return variable if type(variable) == int else None
 
     def _validate_json(self, excel_config_json_path):
 
