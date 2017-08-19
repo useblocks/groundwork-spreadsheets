@@ -210,9 +210,9 @@ class ExcelValidationPlugin:
             if 'type' not in data_type_config:
                 data_type_config['type'] = {'base': 'automatic'}
 
-        #########################################
-        # Read the workbook and sheet
-        #########################################
+        ############################
+        # Get the workbook and sheet
+        ############################
         wb = openpyxl.load_workbook(excel_workbook_path, data_only=True)
         ws = self._get_sheet(wb)
 
@@ -242,21 +242,31 @@ class ExcelValidationPlugin:
         ###################################
         # Determine header column locations
         ###################################
-        # TODO Filter for columns in self.excel_config['data_type_config]
         spreadsheet_headers2columns = {}
         for column in range(oriented_headers_index_config_column_first, oriented_headers_index_config_column_last):
             value = ws[self._transform_coordinates(oriented_headers_index_config_row_first, column)].value
-            spreadsheet_headers2columns[value] = column
+            if value is not None:
+                spreadsheet_headers2columns[value] = column
+            else:
+                # if the value is None we have either
+                # - one or more empty header cell in between 2 filled header cells.
+                # - some empty header cells at the end of the row.
+                #   That might happen because when choosing 'automatic' header row detection, openpyxl functionality
+                #   is used. It always returns the length of the longest row in the whole sheet.
+                #   If that is not the header row, we have empty cells at the end of the header row.
+                #   However, that is not a problem as header values 'None' are not added.
+                pass
         spreadsheet_headers = spreadsheet_headers2columns.keys()
 
-        ################################
-        # Check for not existing headers
-        ################################
+        ###############################################################
+        # Check for not existing headers on spreadsheet and config side
+        ###############################################################
         config_headers = [x['header'] for x in self.excel_config['data_type_config']]
         # Check: Are config data_type_config headers unique?
         if len(config_headers) != len(set(config_headers)):
             self._raise_value_error("Config error: data_type_config -> header duplicate entries found.")
 
+        # Check for configured headers not found in spreadsheet
         missing_headers_in_spreadsheet = list(set(config_headers) - set(spreadsheet_headers))
         for header in missing_headers_in_spreadsheet:
             # Check if the fail_on_header_not_found is true
@@ -267,15 +277,21 @@ class ExcelValidationPlugin:
             else:
                 self._plugin.log.error(msg)
 
-        #################################################
-        # Go through the rows, read and validate the data
-        #################################################
+        # Check for spreadsheet headers not found in config
+        missing_headers_in_config = list(set(spreadsheet_headers) - set(config_headers))
+        self._plugin.log.debug("The following spreadsheet headers are not configured for reading: {0}".format(
+            ', '.join(missing_headers_in_config)))
+        for header in missing_headers_in_config:
+            del spreadsheet_headers2columns[header]
 
-        # determine last row if type is automatic
+        #########################
+        # Determine last data row
+        #########################
+
         if type(oriented_data_index_config_row_last) == int:
             # do nothing, the value is already set
             pass
-        if oriented_data_index_config_row_last == 'automatic':
+        elif oriented_data_index_config_row_last == 'automatic':
             # Take data from library
             oriented_data_index_config_row_last = oriented_data_index_config_row_first
             for curr_column in range(oriented_headers_index_config_column_first,
@@ -286,33 +302,38 @@ class ExcelValidationPlugin:
         else:
             # severalEmptyCells is chosen
             target_empty_rows_count = int(oriented_data_index_config_row_last.split(':')[1])
+            last_row_detected = False
+            curr_row = oriented_data_index_config_row_first
+            empty_rows_count = 0
+            while not last_row_detected:
+                # go through rows
+                all_columns_empty = True
+                for header in spreadsheet_headers2columns:
+                    curr_column = spreadsheet_headers2columns[header]
+                    value = ws[self._transform_coordinates(curr_row, curr_column)].value
+                    if value is not None:
+                        all_columns_empty = False
+                        break
+                if all_columns_empty:
+                    empty_rows_count += 1
+                if empty_rows_count >= target_empty_rows_count:
+                    last_row_detected = True
+                else:
+                    curr_row += 1
+            oriented_data_index_config_row_last = curr_row - target_empty_rows_count
 
+        #################################################
+        # Go through the rows, read and validate the data
+        #################################################
         final_dict = {}
-        last_row_detected = False
-        curr_row = oriented_data_index_config_row_first
-        empty_rows_count = 0
-        while not last_row_detected:
+        for curr_row in range(oriented_data_index_config_row_first, oriented_data_index_config_row_last + 1):
             # go through rows
-            all_columns_empty = True
             final_dict[curr_row] = {}
             for header in spreadsheet_headers2columns:
                 curr_column = spreadsheet_headers2columns[header]
                 # go through columns
                 value = ws[self._transform_coordinates(curr_row, curr_column)].value
-                if value is not None:
-                    all_columns_empty = False
                 final_dict[curr_row][header] = value
-
-            if type(oriented_data_index_config_row_last) == int:
-                if curr_row >= oriented_data_index_config_row_last:
-                    last_row_detected = True
-            else:
-                # severalEmptyCells chosen
-                if all_columns_empty:
-                    empty_rows_count += 1
-                if empty_rows_count >= target_empty_rows_count:
-                    last_row_detected = True
-            curr_row += 1
 
         return final_dict
 
