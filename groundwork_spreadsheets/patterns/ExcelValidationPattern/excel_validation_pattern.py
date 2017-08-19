@@ -1,11 +1,14 @@
 """
 Groundwork Excel read/write routines using openpyxl
 """
-
+import datetime
 import json
 import os
 
 import openpyxl
+import re
+
+import sys
 from openpyxl.utils import get_column_letter
 from groundwork.patterns.gw_base_pattern import GwBasePattern
 from jsonschema import validate, ValidationError, SchemaError
@@ -261,13 +264,15 @@ class ExcelValidationPlugin:
         ###############################################################
         # Check for not existing headers on spreadsheet and config side
         ###############################################################
-        config_headers = [x['header'] for x in self.excel_config['data_type_config']]
+        # Build a data_type_config dictionary with header as key
+        config_header_dict = {x['header']: x for x in self.excel_config['data_type_config']}
+
         # Check: Are config data_type_config headers unique?
-        if len(config_headers) != len(set(config_headers)):
+        if len(config_header_dict.keys()) != len(set(config_header_dict.keys())):
             self._raise_value_error("Config error: data_type_config -> header duplicate entries found.")
 
         # Check for configured headers not found in spreadsheet
-        missing_headers_in_spreadsheet = list(set(config_headers) - set(spreadsheet_headers))
+        missing_headers_in_spreadsheet = list(set(config_header_dict.keys()) - set(spreadsheet_headers))
         for header in missing_headers_in_spreadsheet:
             # Check if the fail_on_header_not_found is true
             data_type = [x for x in self.excel_config['data_type_config'] if x['header'] == header][0]
@@ -278,7 +283,7 @@ class ExcelValidationPlugin:
                 self._plugin.log.error(msg)
 
         # Check for spreadsheet headers not found in config
-        missing_headers_in_config = list(set(spreadsheet_headers) - set(config_headers))
+        missing_headers_in_config = list(set(spreadsheet_headers) - set(config_header_dict.keys()))
         self._plugin.log.debug("The following spreadsheet headers are not configured for reading: {0}".format(
             ', '.join(missing_headers_in_config)))
         for header in missing_headers_in_config:
@@ -287,7 +292,6 @@ class ExcelValidationPlugin:
         #########################
         # Determine last data row
         #########################
-
         if type(oriented_data_index_config_row_last) == int:
             # do nothing, the value is already set
             pass
@@ -325,14 +329,130 @@ class ExcelValidationPlugin:
         #################################################
         # Go through the rows, read and validate the data
         #################################################
+        if sys.version.startswith('2.7'):
+            str_type = 'unicode'
+        elif sys.version.startswith('3'):
+            str_type = 'str'
+        else:
+            raise RuntimeError('The enum type specification does only support Python 2.7 and 3.x')
+
         final_dict = {}
         for curr_row in range(oriented_data_index_config_row_first, oriented_data_index_config_row_last + 1):
-            # go through rows
+            # Go through rows
             final_dict[curr_row] = {}
+
             for header in spreadsheet_headers2columns:
+                # Go through columns
                 curr_column = spreadsheet_headers2columns[header]
-                # go through columns
-                value = ws[self._transform_coordinates(curr_row, curr_column)].value
+                cell_index_str = self._transform_coordinates(curr_row, curr_column)
+                value = ws[cell_index_str].value
+
+                # Start the validation
+                config_header = config_header_dict[header]
+
+                if value is None:
+                    msg = "The '{0}' in cell {1} is empty".format(header, cell_index_str)
+                    if config_header['fail_on_empty_cell']:
+                        self._raise_value_error(msg)
+                    else:
+                        self._plugin.log.warning(msg)
+                else:
+                    if config_header['type']['base'] == 'automatic':
+                        pass
+                    elif config_header['type']['base'] == 'date':
+                        if type(value) != datetime.datetime:
+                            msg = 'The value {0} in cell {1} is of type {2}; required by ' \
+                                  'specification is datetime'.format(value, cell_index_str, type(value))
+                            if config_header['fail_on_type_error']:
+                                self._raise_value_error(msg)
+                            else:
+                                self._plugin.log.warning(msg)
+                    elif config_header['type']['base'] == 'enum':
+                        if type(value).__name__ != str_type:
+                            msg = 'The value {0} in cell {1} is of type {2}; required by ' \
+                                  'specification is str (enum)'.format(value, cell_index_str, type(value))
+                            if config_header['fail_on_type_error']:
+                                self._raise_value_error(msg)
+                            else:
+                                self._plugin.log.warning(msg)
+                        else:
+                            valid_values = config_header['type']['enum_values']
+                            if value not in valid_values:
+                                msg = 'The value {0} in cell {1} is not contained in the given enum ' \
+                                      '[{2}]'.format(value, cell_index_str, ', '.join(valid_values))
+                                if config_header['fail_on_type_error']:
+                                    self._raise_value_error(msg)
+                                else:
+                                    self._plugin.log.warning(msg)
+                    elif config_header['type']['base'] == 'float':
+                        if type(value) != float:
+                            msg = 'The value {0} in cell {1} is of type {2}; required by ' \
+                                  'specification is float'.format(value, cell_index_str, type(value))
+                            if config_header['fail_on_type_error']:
+                                self._raise_value_error(msg)
+                            else:
+                                self._plugin.log.warning(msg)
+                        else:
+                            if 'minimum' in config_header['type']:
+                                if value < config_header['type']['minimum']:
+                                    msg = 'The value {0} in cell {1} is smaller than the given minimum ' \
+                                          'of {2}'.format(value, cell_index_str, config_header['type']['minimum'])
+                                    if config_header['fail_on_type_error']:
+                                        self._raise_value_error(msg)
+                                    else:
+                                        self._plugin.log.warning(msg)
+                            if 'maximum' in config_header['type']:
+                                if value > config_header['type']['maximum']:
+                                    msg = 'The value {0} in cell {1} is greater than the given maximum ' \
+                                          'of {2}'.format(value, cell_index_str, config_header['type']['maximum'])
+                                    if config_header['fail_on_type_error']:
+                                        self._raise_value_error(msg)
+                                    else:
+                                        self._plugin.log.warning(msg)
+                    elif config_header['type']['base'] == 'integer':
+                        if type(value) != int:
+                            msg = 'The value {0} in cell {1} is of type {2}; required by ' \
+                                  'specification is int'.format(value, cell_index_str, type(value))
+                            if config_header['fail_on_type_error']:
+                                self._raise_value_error(msg)
+                            else:
+                                self._plugin.log.warning(msg)
+                        else:
+                            if 'minimum' in config_header['type']:
+                                if value < config_header['type']['minimum']:
+                                    msg = 'The value {0} in cell {1} is smaller than the given minimum ' \
+                                          'of {2}'.format(value, cell_index_str, config_header['type']['minimum'])
+                                    if config_header['fail_on_type_error']:
+                                        self._raise_value_error(msg)
+                                    else:
+                                        self._plugin.log.warning(msg)
+                            if 'maximum' in config_header['type']:
+                                if value > config_header['type']['maximum']:
+                                    msg = 'The value {0} in cell {1} is greater than the given maximum ' \
+                                          'of {2}'.format(value, cell_index_str, config_header['type']['maximum'])
+                                    if config_header['fail_on_type_error']:
+                                        self._raise_value_error(msg)
+                                    else:
+                                        self._plugin.log.warning(msg)
+                    elif config_header['type']['base'] == 'string':
+                        if type(value).__name__ != str_type:
+                            msg = 'The value {0} in cell {1} is of type {2}; required by ' \
+                                  'specification is string'.format(value, cell_index_str, type(value))
+                            if config_header['fail_on_type_error']:
+                                self._raise_value_error(msg)
+                            else:
+                                self._plugin.log.warning(msg)
+                        else:
+                            if 'pattern' in config_header['type']:
+                                if re.search(config_header['type']['pattern'], value) is None:
+                                    msg = 'The value {0} in cell {1} does not follow the ' \
+                                          'given pattern {2}'.format(value, cell_index_str,
+                                                                     config_header['type']['pattern'])
+                                    if config_header['fail_on_type_error']:
+                                        self._raise_value_error(msg)
+                                    else:
+                                        self._plugin.log.warning(msg)
+
                 final_dict[curr_row][header] = value
 
         return final_dict
