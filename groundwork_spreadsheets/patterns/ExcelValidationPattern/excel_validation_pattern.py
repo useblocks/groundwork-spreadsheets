@@ -233,14 +233,14 @@ class ExcelValidationPlugin:
             # severalEmptyCells chosen
             target_empty_cell_count = int(oriented_headers_index_config_column_last.split(':')[1])
             empty_cell_count = 0
-            oriented_headers_index_config_column_last = oriented_headers_index_config_column_first
+            curr_column = oriented_headers_index_config_column_first
             while empty_cell_count < target_empty_cell_count:
                 value = ws[self._transform_coordinates(oriented_headers_index_config_row_first,
-                                                       oriented_headers_index_config_column_last)].value
+                                                       curr_column)].value
                 if value is None:
                     empty_cell_count += 1
-                    oriented_headers_index_config_column_last += 1
-                    oriented_headers_index_config_column_last -= target_empty_cell_count + 1
+                curr_column += 1
+            oriented_headers_index_config_column_last = curr_column - target_empty_cell_count - 1
 
         ###################################
         # Determine header column locations
