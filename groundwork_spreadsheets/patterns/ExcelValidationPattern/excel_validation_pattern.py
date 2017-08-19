@@ -43,7 +43,9 @@ class ExcelValidationPlugin:
         # The exceptions raised in this method shall be raised to the plugin level
         self.excel_config = self._validate_json(excel_config_json_path)
 
-        # Check config: headers_index_config and data_index_config
+        #########################
+        # Get index configuration
+        #########################
         orientation = self.excel_config['orientation']
         headers_index_config_row_first = self.excel_config['headers_index_config']['row_index']['first']
         headers_index_config_row_last = self.excel_config['headers_index_config']['row_index']['last']
@@ -54,7 +56,10 @@ class ExcelValidationPlugin:
         data_index_config_column_first = self.excel_config['data_index_config']['column_index']['first']
         data_index_config_column_last = self.excel_config['data_index_config']['column_index']['last']
 
-        # rotate coordinates so we can work with virtually column_based all the time
+        ############################################################################
+        # Rotate coordinates so we can work with virtually column based all the time
+        # Just before addressing the cells a coordinate transformation is done again
+        ############################################################################
         if orientation == 'column_based':
             oriented_headers_index_config_row_first = headers_index_config_row_first
             oriented_headers_index_config_row_last = headers_index_config_row_last
@@ -75,10 +80,13 @@ class ExcelValidationPlugin:
             oriented_data_index_config_column_first = data_index_config_row_first
             oriented_data_index_config_column_last = data_index_config_row_last
 
+        # Used for log and exception messages
         oriented_row_text = "row" if orientation == 'column_based' else "column"
         oriented_column_text = "column" if orientation == 'column_based' else "row"
 
-        # set defaults of headers_index_config
+        ######################################
+        # Set defaults of headers_index_config
+        ######################################
         if type(oriented_headers_index_config_row_first) is not int:
             # Assume the user wants to use the first row as header row
             oriented_headers_index_config_row_first = 1
@@ -105,7 +113,9 @@ class ExcelValidationPlugin:
                 self._plugin.log.debug("Config update: Setting headers_index_config -> {0}_index -> first to "
                                        "{1}".format(oriented_column_text, oriented_headers_index_config_column_last))
 
-        # set defaults of data_index_config
+        ###################################
+        # Set defaults of data_index_config
+        ###################################
         if type(oriented_data_index_config_row_first) is not int:
             # Assume the first data row is the next after oriented_headers_index_config_row_last
             oriented_data_index_config_row_first = oriented_headers_index_config_row_last + 1
@@ -128,7 +138,10 @@ class ExcelValidationPlugin:
                 self._plugin.log.debug("Config update: Setting data_index_config -> {0}_index -> last to "
                                        "{1}".format(oriented_column_text, oriented_data_index_config_column_last))
 
+        ################################
         # Some more logic checks on rows
+        # (matrix size and row order)
+        ################################
         if oriented_headers_index_config_row_last != oriented_headers_index_config_row_first:
             # We can compare both because at this point they have to be integer
             # Multi line headers given
@@ -147,7 +160,10 @@ class ExcelValidationPlugin:
                 self._raise_value_error("Config error: data_index_config -> {0}_index -> first is greater than "
                                         "data_index_config -> {0}_index -> last.".format(oriented_row_text))
 
+        ###################################
         # Some more logic checks on columns
+        # (mismatches)
+        ###################################
         if oriented_headers_index_config_column_first != oriented_data_index_config_column_first:
             # We can compare both because at this point they have to be integer
             # First column mismatch
@@ -166,7 +182,18 @@ class ExcelValidationPlugin:
                             oriented_data_index_config_column_last
                         ))
 
+        if type(oriented_headers_index_config_column_last) is not int:
+            if type(oriented_data_index_config_column_last) is not int:
+                # The column count search is done on the header row, not on data
+                if oriented_data_index_config_column_last != 'automatic':
+                    self._raise_value_error(
+                        "Config error: data_index_config -> {0}_index -> last ({1}) may only be an integer or "
+                        "contain the value 'automatic'.".format(oriented_column_text,
+                                                                oriented_data_index_config_column_last))
+
+        #########################################
         # Set defaults for optional config values
+        #########################################
         if 'sheet_config' not in self.excel_config:
             self.excel_config['sheet_config'] = 'active'
 
@@ -183,36 +210,48 @@ class ExcelValidationPlugin:
             if 'type' not in data_type_config:
                 data_type_config['type'] = {'base': 'automatic'}
 
+        #########################################
+        # Read the workbook and sheet
+        #########################################
         wb = openpyxl.load_workbook(excel_workbook_path, data_only=True)
-
         ws = self._get_sheet(wb)
 
+        #############################
         # Determine header row length
+        #############################
         if type(oriented_headers_index_config_column_last) == int:
-            header_column_last = oriented_headers_index_config_column_last
+            # oriented_headers_index_config_column_last already has the final value
+            pass
         elif oriented_headers_index_config_column_last == 'automatic':
-            header_column_last = len(ws[self._transform_coordinates(oriented_headers_index_config_row_first)])
+            # automatic: use the length of the header row
+            oriented_headers_index_config_column_last = len(
+                ws[self._transform_coordinates(row=oriented_headers_index_config_row_first)])
         else:
             # severalEmptyCells chosen
             target_empty_cell_count = int(oriented_headers_index_config_column_last.split(':')[1])
             empty_cell_count = 0
-            header_column_last = oriented_headers_index_config_column_first
+            oriented_headers_index_config_column_last = oriented_headers_index_config_column_first
             while empty_cell_count < target_empty_cell_count:
                 value = ws[self._transform_coordinates(oriented_headers_index_config_row_first,
-                                                       header_column_last)].value
+                                                       oriented_headers_index_config_column_last)].value
                 if value is None:
                     empty_cell_count += 1
-                header_column_last += 1
-            header_column_last -= target_empty_cell_count + 1
+                    oriented_headers_index_config_column_last += 1
+                    oriented_headers_index_config_column_last -= target_empty_cell_count + 1
 
+        ###################################
         # Determine header column locations
+        ###################################
+        # TODO Filter for columns in self.excel_config['data_type_config]
         spreadsheet_headers2columns = {}
-        for column in range(oriented_headers_index_config_column_first, header_column_last):
+        for column in range(oriented_headers_index_config_column_first, oriented_headers_index_config_column_last):
             value = ws[self._transform_coordinates(oriented_headers_index_config_row_first, column)].value
             spreadsheet_headers2columns[value] = column
         spreadsheet_headers = spreadsheet_headers2columns.keys()
 
+        ################################
         # Check for not existing headers
+        ################################
         config_headers = [x['header'] for x in self.excel_config['data_type_config']]
         # Check: Are config data_type_config headers unique?
         if len(config_headers) != len(set(config_headers)):
@@ -222,24 +261,60 @@ class ExcelValidationPlugin:
         for header in missing_headers_in_spreadsheet:
             # Check if the fail_on_header_not_found is true
             data_type = [x for x in self.excel_config['data_type_config'] if x['header'] == header][0]
+            msg = "Config error: The header '{0}' could not be found in the spreadsheet.".format(header)
             if data_type['fail_on_header_not_found']:
-                self._raise_value_error("Config error: The header '{0}' could not be found in the spreadsheet.".format(
-                    header))
+                self._raise_value_error(msg)
+            else:
+                self._plugin.log.error(msg)
 
-        # Go through the rows and read the data
-        # final_dict = {}
+        #################################################
+        # Go through the rows, read and validate the data
+        #################################################
 
-        print(ws.max_row)
-        print(ws.max_column)
-        print(ws.dimensions)
+        # determine last row if type is automatic
+        if type(oriented_data_index_config_row_last) == int:
+            # do nothing, the value is already set
+            pass
+        if oriented_data_index_config_row_last == 'automatic':
+            # Take data from library
+            oriented_data_index_config_row_last = oriented_data_index_config_row_first
+            for curr_column in range(oriented_headers_index_config_column_first,
+                                     oriented_headers_index_config_column_last):
+                len_curr_column = len(ws[self._transform_coordinates(column=curr_column)])
+                if len_curr_column > oriented_data_index_config_row_last:
+                    oriented_data_index_config_row_last = len_curr_column
+        else:
+            # severalEmptyCells is chosen
+            target_empty_rows_count = int(oriented_data_index_config_row_last.split(':')[1])
 
-        print(ws['A2'].value)
-        print(type(ws['A2'].value))
-        print(ws['B2'].value)
-        print(type(ws['B2'].value))
-        print(wb.get_sheet_names())
+        final_dict = {}
+        last_row_detected = False
+        curr_row = oriented_data_index_config_row_first
+        empty_rows_count = 0
+        while not last_row_detected:
+            # go through rows
+            all_columns_empty = True
+            final_dict[curr_row] = {}
+            for header in spreadsheet_headers2columns:
+                curr_column = spreadsheet_headers2columns[header]
+                # go through columns
+                value = ws[self._transform_coordinates(curr_row, curr_column)].value
+                if value is not None:
+                    all_columns_empty = False
+                final_dict[curr_row][header] = value
 
-        return {}
+            if type(oriented_data_index_config_row_last) == int:
+                if curr_row >= oriented_data_index_config_row_last:
+                    last_row_detected = True
+            else:
+                # severalEmptyCells chosen
+                if all_columns_empty:
+                    empty_rows_count += 1
+                if empty_rows_count >= target_empty_rows_count:
+                    last_row_detected = True
+            curr_row += 1
+
+        return final_dict
 
     def _validate_json(self, excel_config_json_path):
 
