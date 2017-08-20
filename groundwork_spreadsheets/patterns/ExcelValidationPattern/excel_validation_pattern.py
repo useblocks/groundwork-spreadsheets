@@ -246,7 +246,7 @@ class ExcelValidationPlugin:
         # Determine header column locations
         ###################################
         spreadsheet_headers2columns = {}
-        for column in range(oriented_headers_index_config_column_first, oriented_headers_index_config_column_last):
+        for column in range(oriented_headers_index_config_column_first, oriented_headers_index_config_column_last + 1):
             value = ws[self._transform_coordinates(oriented_headers_index_config_row_first, column)].value
             if value is not None:
                 spreadsheet_headers2columns[value] = column
