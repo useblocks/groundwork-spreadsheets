@@ -65,7 +65,7 @@ Package content
 ---------------
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 4
 
     contents/usage
     contents/configuration
