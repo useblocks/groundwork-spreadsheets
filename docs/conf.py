@@ -138,7 +138,7 @@ html_theme = 'groundwork'
 #
 html_theme_options = {
     "stickysidebar": True,
-    "stickysidebarscrollable": False,
+    "stickysidebarscrollable": True,
     "contribute": True,
     "github_fork": "useblocks/groundwork-spreadsheets",
     "github_ribbon_color": "white_ffffff",
