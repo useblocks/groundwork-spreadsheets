@@ -10,6 +10,7 @@ def test_sheet_active(emptyApp):
     data = plugin.excel_validation.read_excel(config_path, workbook_path)
     assert data[2]['Text'] == "sheet_middle_active"
 
+
 def test_sheet_byIndex(emptyApp):
     plugin = EmptyPlugin(emptyApp)
     workbook_path = get_test_data_path('sheets.xlsx')
