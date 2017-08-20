@@ -1,0 +1,32 @@
+{
+    "sheet_config": 3,
+    "orientation": "column_based",
+    "headers_index_config": {
+        "row_index": {
+            "first": "automatic",
+            "last": "automatic"
+        },
+        "column_index": {
+            "first": "automatic",
+            "last": "automatic"
+        }
+    },
+    "data_index_config": {
+        "row_index": {
+            "first": "automatic",
+            "last": "automatic"
+        },
+        "column_index": {
+            "first": "automatic",
+            "last": "automatic"
+        }
+    },
+    "data_type_config": [
+        {
+            "header": "Text",
+            "type": {
+                "base": "string"
+            }
+        }
+    ]
+}

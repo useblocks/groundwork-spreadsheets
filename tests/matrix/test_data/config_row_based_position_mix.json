@@ -1,0 +1,38 @@
+{
+    "sheet_config": "first",
+    "orientation": "row_based",
+    "headers_index_config": {
+        "row_index": {
+            "first": "automatic",
+            "last": "automatic"
+        },
+        "column_index": {
+            "first": "automatic",
+            "last": "automatic"
+        }
+    },
+    "data_index_config": {
+        "row_index": {
+            "first": "automatic",
+            "last": "automatic"
+        },
+        "column_index": {
+            "first": "automatic",
+            "last": "automatic"
+        }
+    },
+    "data_type_config": [
+        {
+            "header": "Text",
+            "type": {
+                "base": "string"
+            }
+        },
+        {
+            "header": "Integer",
+            "type": {
+                "base": "integer"
+            }
+        }
+    ]
+}

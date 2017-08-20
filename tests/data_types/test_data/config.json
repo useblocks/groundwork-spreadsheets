@@ -1,0 +1,62 @@
+{
+    "sheet_config": "active",
+    "orientation": "column_based",
+    "headers_index_config": {
+        "row_index": {
+            "first": "automatic",
+            "last": "automatic"
+        },
+        "column_index": {
+            "first": "automatic",
+            "last": "automatic"
+        }
+    },
+    "data_index_config": {
+        "row_index": {
+            "first": "automatic",
+            "last": "automatic"
+        },
+        "column_index": {
+            "first": "automatic",
+            "last": "automatic"
+        }
+    },
+    "data_type_config": [
+        {
+            "header": "Date",
+            "type": {
+                "base": "date"
+            }
+        },
+        {
+            "header": "Enum",
+            "type": {
+                "base": "enum",
+                "enum_values": ["ape", "dog", "cat"]
+            }
+        },
+        {
+            "header": "Float",
+            "type": {
+                "base": "float",
+                "minimum": 1.1,
+                "maximum": 334
+            }
+        },
+        {
+            "header": "Integer",
+            "type": {
+                "base": "integer",
+                "minimum": -3,
+                "maximum": 30
+            }
+        },
+        {
+            "header": "Text",
+            "type": {
+                "base": "string",
+                "pattern": "^Text [0-9]$"
+            }
+        }
+    ]
+}

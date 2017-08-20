@@ -23,12 +23,15 @@
     },
     "data_type_config": [
         {
-            "header": "hex number",
-            "fail_on_type_error": true,
-            "fail_on_empty_cell": true,
+            "header": "Text",
             "type": {
-                "base": "string",
-                "pattern": "^0x[A-F0-9]{6}$"
+                "base": "string"
+            }
+        },
+        {
+            "header": "Integer",
+            "type": {
+                "base": "integer"
             }
         }
     ]
