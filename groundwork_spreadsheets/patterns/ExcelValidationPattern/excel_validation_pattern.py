@@ -410,14 +410,12 @@ class ExcelValidationPlugin:
                                     else:
                                         self._plugin.log.warning(msg)
                     elif config_header['type']['base'] == 'integer':
-                        if type(value) != int:
-                            msg = 'The value {0} in cell {1} is of type {2}; required by ' \
-                                  'specification is int'.format(value, cell_index_str, type(value))
-                            if config_header['fail_on_type_error']:
-                                self._raise_value_error(msg)
-                            else:
-                                self._plugin.log.warning(msg)
-                        else:
+                        # Integer values stored by Excel are returned as float (e.g. 3465.0)
+                        # So we have to check if the float can be converted to int without precision loss
+                        if type(value) == float:
+                            if value.is_integer():
+                                value = int(value)
+                        if type(value) == int:
                             if 'minimum' in config_header['type']:
                                 if value < config_header['type']['minimum']:
                                     msg = 'The value {0} in cell {1} is smaller than the given minimum ' \
@@ -434,6 +432,14 @@ class ExcelValidationPlugin:
                                         self._raise_value_error(msg)
                                     else:
                                         self._plugin.log.warning(msg)
+                        else:
+                            msg = 'The value {0} in cell {1} is of type {2}; required by ' \
+                                  'specification is int'.format(value, cell_index_str, type(value))
+                            if config_header['fail_on_type_error']:
+                                self._raise_value_error(msg)
+                            else:
+                                self._plugin.log.warning(msg)
+
                     elif config_header['type']['base'] == 'string':
                         if type(value).__name__ != str_type:
                             msg = 'The value {0} in cell {1} is of type {2}; required by ' \
