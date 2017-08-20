@@ -1,5 +1,5 @@
 {
-    "sheet_config": "first",
+    "sheet_config": "active",
     "orientation": "column_based",
     "headers_index_config": {
         "row_index": {
@@ -13,7 +13,7 @@
     },
     "data_index_config": {
         "row_index": {
-            "first": 1,
+            "first": "automatic",
             "last": "automatic"
         },
         "column_index": {
@@ -23,12 +23,9 @@
     },
     "data_type_config": [
         {
-            "header": "hex number",
-            "fail_on_type_error": true,
-            "fail_on_empty_cell": true,
+            "header": "Text",
             "type": {
-                "base": "string",
-                "pattern": "^0x[A-F0-9]{6}$"
+                "base": "string"
             }
         }
     ]

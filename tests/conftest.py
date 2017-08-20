@@ -1,3 +1,4 @@
+import inspect
 import os
 import pytest
 
@@ -15,8 +16,10 @@ def emptyApp():
     return app
 
 
-def _get_test_data_path(filename):
-    return os.path.join(os.path.dirname(__file__), 'test_data', filename)
+def get_test_data_path(filename):
+    frame = inspect.stack()[1]
+    py_module = inspect.getmodule(frame[0])
+    return os.path.join(os.path.dirname(py_module.__file__), 'test_data', filename)
 
 
 class EmptyPlugin(ExcelValidationPattern):
