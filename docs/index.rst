@@ -39,24 +39,27 @@ Functions
 
 **ExcelValidationPattern**
 
+Target audience are users who need to read well structured Excel documents with minimal overhead.
+The Excel documents can be validated in various ways to detect input data problems.
+
 *   Uses the library `openpyxl <https://openpyxl.readthedocs.io/en/default/>`_
 *   Can read Excel 2010 files (xlsx, xlsm)
 *   Configure your sheet using a json file
-*   Auto detect columns by names
-*   Layout can be
+*   Auto detect columns by names. You can move columns without affecting the read routines.
+*   The data layout can be
 
-    *   column based: headers are in a single *row* and data is below
-    *   row based: headers are in a single *column* and data is right of the headers
+    *   column based: headers are in a single *row* and the data is below
+    *   row based: headers are in a single *column* and the data is on the right
 
-*   Define column types and verify cells against it
+*   Define column types and verify cell values against it
 
     *   Date
-    *   Enums (e.g. only  the values yes and no are allowed)
-    *   Floating point numbers (+minimum/maximum check)
-    *   Integer numbers (+minimum/maximum check)
-    *   String (+RegEx pattern check)
+    *   Enums (e.g. only  the values 'yes' and 'no' are allowed)
+    *   Floating point numbers with optional min/max check
+    *   Integer numbers with optional min/max check
+    *   String with optional regular expression pattern check
 
-*   Get a dictionary as output with the following form ``row or column number -> header name -> cell value``
+*   Output is a dictionary of the following form ``row or column number`` -> ``header name`` -> ``cell value``
 
 Package content
 ---------------

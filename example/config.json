@@ -1,0 +1,77 @@
+{
+    "sheet_config": "active",
+    "orientation": "column_based",
+    "headers_index_config": {
+        "row_index": {
+            "first": "automatic",
+            "last": "automatic"
+        },
+        "column_index": {
+            "first": "automatic",
+            "last": "automatic"
+        }
+    },
+    "data_index_config": {
+        "row_index": {
+            "first": "automatic",
+            "last": "automatic"
+        },
+        "column_index": {
+            "first": "automatic",
+            "last": "automatic"
+        }
+    },
+    "data_type_config": [
+        {
+            "header": "Date",
+            "fail_on_type_error": false,
+            "fail_on_empty_cell": false,
+            "fail_on_header_not_found": true,
+            "type": {
+                "base": "date"
+            }
+        },
+        {
+            "header": "Enum",
+            "fail_on_type_error": true,
+            "fail_on_empty_cell": true,
+            "fail_on_header_not_found": true,
+            "type": {
+                "base": "enum",
+                "enum_values": ["ape", "dog", "cat"]
+            }
+        },
+        {
+            "header": "Float",
+            "fail_on_type_error": true,
+            "fail_on_empty_cell": true,
+            "fail_on_header_not_found": true,
+            "type": {
+                "base": "float",
+                "minimum": 1.1,
+                "maximum": 334
+            }
+        },
+        {
+            "header": "Integer",
+            "fail_on_type_error": true,
+            "fail_on_empty_cell": true,
+            "fail_on_header_not_found": true,
+            "type": {
+                "base": "integer",
+                "minimum": -3,
+                "maximum": 30
+            }
+        },
+        {
+            "header": "Text",
+            "fail_on_type_error": true,
+            "fail_on_empty_cell": true,
+            "fail_on_header_not_found": true,
+            "type": {
+                "base": "string",
+                "pattern": "^Text [0-9]$"
+            }
+        }
+    ]
+}
