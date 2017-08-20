@@ -422,7 +422,7 @@ class ExcelValidationPlugin:
                             if value.is_integer():
                                 value = int(value)
                         # For Python 2.7, openpyxl returns a long type
-                        if type(value).__name__ != int_type:
+                        if type(value).__name__ == int_type:
                             if 'minimum' in config_header['type']:
                                 if value < config_header['type']['minimum']:
                                     msg = 'The value {0} in cell {1} is smaller than the given minimum ' \
