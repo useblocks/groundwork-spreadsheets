@@ -335,6 +335,12 @@ class ExcelValidationPlugin:
             str_type = 'str'
         else:
             raise RuntimeError('The enum type specification does only support Python 2.7 and 3.x')
+        if sys.version.startswith('2.7'):
+            int_type = 'long'
+        elif sys.version.startswith('3'):
+            int_type = 'int'
+        else:
+            raise RuntimeError('The integer type specification does only support Python 2.7 and 3.x')
 
         final_dict = {}
         for curr_row in range(oriented_data_index_config_row_first, oriented_data_index_config_row_last + 1):
@@ -415,7 +421,8 @@ class ExcelValidationPlugin:
                         if type(value) == float:
                             if value.is_integer():
                                 value = int(value)
-                        if type(value) == int:
+                        # For Python 2.7, openpyxl returns a long type
+                        if type(value).__name__ != int_type:
                             if 'minimum' in config_header['type']:
                                 if value < config_header['type']['minimum']:
                                     msg = 'The value {0} in cell {1} is smaller than the given minimum ' \
