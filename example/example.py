@@ -18,6 +18,7 @@ class ReadCustomExcel(ExcelValidationPattern):
     def deactivate(self):
         pass
 
+
 if __name__ == '__main__':
     app = App(plugins=[], strict=True)
     plugin = ReadCustomExcel(app)
