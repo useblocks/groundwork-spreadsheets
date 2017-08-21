@@ -17,15 +17,16 @@ For more information regarding groundwork, see `here <https://groundwork.readthe
     *   column based: headers are in a single *row* and data is below
     *   row based: headers are in a single *column* and data is right of the headers
 
-*   Define column types and verify cells against it
+*   Define column types and verify cell values against them
 
     *   Date
-    *   Enums (e.g. only  the values yes and no are allowed)
-    *   Floating point numbers (+minimum/maximum check)
-    *   Integer numbers (+minimum/maximum check)
-    *   String (+RegEx pattern check)
+    *   Enums (e.g. only  the values 'yes' and 'no' are allowed)
+    *   Floating point numbers with optional min/max check
+    *   Integer numbers with optional min/max check
+    *   String with optional regular expression pattern check
 
-*   Get a dictionary as output with the following form ``row number -> header name -> cell value``
+*   Output is a dictionary of the following form ``row or column number`` -> ``header name`` -> ``cell value``
+*   Extensive logging of problems
 
 Here is how an example json config file looks like::
 

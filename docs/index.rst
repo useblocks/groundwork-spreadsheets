@@ -51,7 +51,7 @@ The Excel documents can be validated in various ways to detect input data proble
     *   column based: headers are in a single *row* and the data is below
     *   row based: headers are in a single *column* and the data is on the right
 
-*   Define column types and verify cell values against it
+*   Define column types and verify cell values against them
 
     *   Date
     *   Enums (e.g. only  the values 'yes' and 'no' are allowed)
@@ -60,6 +60,7 @@ The Excel documents can be validated in various ways to detect input data proble
     *   String with optional regular expression pattern check
 
 *   Output is a dictionary of the following form ``row or column number`` -> ``header name`` -> ``cell value``
+*   Extensive logging of problems
 
 Package content
 ---------------
