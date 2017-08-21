@@ -73,13 +73,13 @@ row_based           string  "orientation": "row_based"      Each header and its 
 ::
 
     *******************************
-    * header1 * header2 * header3 *
+    * header1   header2   header3 *
     *******************************
-    * value1  * value1  * value1  *
-    *         *         *         *
-    * value2  * value2  * value2  *
-    *         *         *         *
-    * value3  * value3  * value3  *
+    * value1    value1    value1  *
+    *                             *
+    * value2    value2    value2  *
+    *                             *
+    * value3    value3    value3  *
     *******************************
 
 
@@ -380,6 +380,13 @@ Specification::
 The ``minimum`` field is optional. The ``maximum`` field is optional.
 If the minimum or maximum constraint fails, it will be handled as a type error (see :ref:`data_type_common_params`).
 
+.. note::
+    For documents saved by MS Excel, openpyxl returns integer values with the 'float' data type (e.g. 33345.0).
+    The ExcelValidationPattern checks if the float can be converted to int without precision loss
+    (using 'value.is_integer()').
+    If yes a type cast to int is done, that means you can always expect the 'int' type.
+    If no it is a type error.
+
 integer
 ^^^^^^^
 
@@ -393,6 +400,11 @@ Specification::
 
 The ``minimum`` field is optional. The ``maximum`` field is optional.
 If the minimum or maximum constraint fails, it will be handled as a type error (see :ref:`data_type_common_params`).
+
+.. note::
+    For Python 2.7, openpyxl returns integers with the 'long' data type.
+    For Python 3, openpyxl returns text with the 'int' data type.
+    Both are accepted by the above integer type. No type conversion is done by ExcelValidationPattern.
 
 string
 ^^^^^^
@@ -409,3 +421,8 @@ If the pattern constraint fails, it will be handled as a type error (see :ref:`d
 
 The ``pattern`` will be checked using the Python re.search routine. If you would like to check the whole cell value,
 use the anchors ``^`` and ``$``.
+
+.. note::
+    For Python 2.7, openpyxl returns text with the 'unicode' data type.
+    For Python 3, openpyxl returns text with the 'str' data type.
+    Both are accepted by the above string type. No type conversion is done by ExcelValidationPattern.
