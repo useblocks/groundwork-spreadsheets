@@ -229,6 +229,8 @@ class ExcelValidationPlugin:
             # automatic: use the length of the header row
             oriented_headers_index_config_column_last = len(
                 ws[self._transform_coordinates(row=oriented_headers_index_config_row_first)])
+            self._plugin.log.debug("Config update: Last header {0} was set to {1} using the 'automatic' "
+                                   "mechanism.".format(oriented_column_text, oriented_headers_index_config_column_last))
         else:
             # severalEmptyCells chosen
             target_empty_cell_count = int(oriented_headers_index_config_column_last.split(':')[1])
@@ -241,6 +243,8 @@ class ExcelValidationPlugin:
                     empty_cell_count += 1
                 curr_column += 1
             oriented_headers_index_config_column_last = curr_column - target_empty_cell_count - 1
+            self._plugin.log.debug("Config update: Last header {0} was set to {1} using the 'automatic' "
+                                   "mechanism.".format(oriented_column_text, oriented_headers_index_config_column_last))
 
         ###################################
         # Determine header column locations
@@ -284,10 +288,11 @@ class ExcelValidationPlugin:
 
         # Check for spreadsheet headers not found in config
         missing_headers_in_config = list(set(spreadsheet_headers) - set(config_header_dict.keys()))
-        self._plugin.log.debug("The following spreadsheet headers are not configured for reading: {0}".format(
-            ', '.join(missing_headers_in_config)))
-        for header in missing_headers_in_config:
-            del spreadsheet_headers2columns[header]
+        if missing_headers_in_config:
+            self._plugin.log.debug("The following spreadsheet headers are not configured for reading: {0}".format(
+                ', '.join(missing_headers_in_config)))
+            for header in missing_headers_in_config:
+                del spreadsheet_headers2columns[header]
 
         #########################
         # Determine last data row
@@ -303,6 +308,8 @@ class ExcelValidationPlugin:
                 len_curr_column = len(ws[self._transform_coordinates(column=curr_column)])
                 if len_curr_column > oriented_data_index_config_row_last:
                     oriented_data_index_config_row_last = len_curr_column
+            self._plugin.log.debug("Config update: Last data {0} was set to {1} using the 'automatic' "
+                                   "mechanism.".format(oriented_row_text, oriented_data_index_config_row_last))
         else:
             # severalEmptyCells is chosen
             target_empty_rows_count = int(oriented_data_index_config_row_last.split(':')[1])
@@ -325,6 +332,8 @@ class ExcelValidationPlugin:
                 else:
                     curr_row += 1
             oriented_data_index_config_row_last = curr_row - target_empty_rows_count
+            self._plugin.log.debug("Config update: Last data {0} was set to {1} using the 'severalEmptyCells' "
+                                   "mechanism.".format(oriented_row_text, oriented_data_index_config_row_last))
 
         #################################################
         # Go through the rows, read and validate the data
