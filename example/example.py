@@ -20,7 +20,7 @@ class ReadCustomExcel(ExcelValidationPattern):
 
 
 if __name__ == '__main__':
-    app = App(plugins=[], strict=True)
+    app = App(config_files=['configuration.py'], plugins=[], strict=True)
     plugin = ReadCustomExcel(app)
     data = plugin.excel_validation.read_excel('config.json', 'example.xlsx')
     for row in data:
