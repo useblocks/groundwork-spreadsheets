@@ -26,6 +26,7 @@ For more information regarding groundwork, see `here <https://groundwork.readthe
     *   Integer numbers with optional min/max check
     *   String with optional regular expression pattern check
 
+*   Exclude data row/columns based on filter criteria
 *   Output is a dictionary of the following form ``row or column number`` -> ``header name`` -> ``cell value``
 *   Extensive logging of problems
 

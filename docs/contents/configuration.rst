@@ -1,7 +1,9 @@
 Configuration
 =============
 
-This is the base structure of the configuration .json file::
+This is the base structure of the configuration .json file:
+
+.. code-block:: json
 
     {
         "sheet_config": "active",
@@ -28,12 +30,30 @@ This is the base structure of the configuration .json file::
         },
         "data_type_config": [
             {
-                "header": "Text",
+                "header": "Text Column",
                 "type": {
                     "base": "string"
                 }
+            },
+            {
+                "header": "Animals Column",
+                "fail_on_type_error": true,
+                "fail_on_empty_cell": true,
+                "fail_on_header_not_found": true,
+                "type": {
+                    "base": "enum",
+                    "enum_values": ["ape", "dog", "cat"],
+                    "filter": {
+                        "whitelist_values": ["ape", "cat"]
+                    }
+                }
             }
-        ]
+        ],
+        "filter_properties": {
+            "excluded_fail_on_empty_cell": false,
+            "excluded_fail_on_type_error": false,
+            "excluded_enable_logging": false
+        }
     }
 
 sheet_config
@@ -366,6 +386,21 @@ Specification::
 
 The ``enum_values`` field is mandatory.
 
+The enum type supports filtering using a whitelist of enum values::
+
+    "type": {
+        "base": "enum",
+        "enum_values": [<list_of_string_values>],
+        "filter": {
+            "whitelist_values": [<list_of_allowed_values>]
+        }
+    }
+
+Within the ``filter`` property, the ``whitelist_values`` field is mandatory.
+
+The target data will only returns data rows/columns containing the specified allowed values. It's possible to have
+filters on several enum types. In this case, only rows/columns are returned which are contained by both filters.
+
 float
 ^^^^^
 
@@ -426,3 +461,42 @@ use the anchors ``^`` and ``$``.
     For Python 2.7, openpyxl returns text with the 'unicode' data type.
     For Python 3, openpyxl returns text with the 'str' data type.
     Both are accepted by the above string type. No type conversion is done by ExcelValidationPattern.
+
+filter_properties
+-----------------
+
+This dictionary specifies how filters affect errors of excluded rows/columns.
+Excluded rows/columns are commonly not of primary interest to the user, so it makes sense to mask errors that might
+arise there. The variables set here can overwrite the data type definitions.
+
+=========================== ======  =======
+Parameter                   Type    Meaning
+=========================== ======  =======
+excluded_fail_on_empty_cell bool    | If **true**, an empty cell in an excluded row/column will **still raise an exception**.
+                                    | If **false**, an empty cell in an excluded row/column will **not raise an exception**.
+excluded_fail_on_type_error bool    | If **true**, a type error in an excluded row/column will **still raise an exception**.
+                                    | If **false**, a type error in an excluded row/column will **not raise an exception**.
+excluded_enable_logging     bool    | If **true**, empty cell and type errors which are configured not to raise an exception, will still be logged.
+                                    | If **false**, empty cell and type errors which are configured not to raise an exception, will not be logged.
+=========================== ======  =======
+
+**Example 1**::
+
+    "filter_properties": {
+        "excluded_fail_on_empty_cell": false,
+        "excluded_fail_on_type_error": false,
+        "excluded_enable_logging": false
+    }
+
+In above case, errors in excluded rows/columns will neither raise an exception nor be logged.
+
+**Example 2**::
+
+    "filter_properties": {
+        "excluded_fail_on_empty_cell": true,
+        "excluded_fail_on_type_error": false,
+        "excluded_enable_logging": true
+    }
+
+In above case, empty cell errors in excluded rows/columns will raise exceptions.
+Type errors in excluded rows/columns, however, will just be logged.
