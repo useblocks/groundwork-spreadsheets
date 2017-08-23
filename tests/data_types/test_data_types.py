@@ -1,10 +1,17 @@
+import pytest
+
 from tests.conftest import EmptyPlugin, get_test_data_path
 import datetime
 
 
-def test_data_types(emptyApp):
+@pytest.mark.parametrize('path', [
+    'data_types_libreoffice.xlsx',
+    'data_types_excel_2013.xlsx',
+    'data_types_excel_2013.xlsm',
+])
+def test_data_types(emptyApp, path):
     plugin = EmptyPlugin(emptyApp)
-    workbook_path = get_test_data_path('data_types_libreoffice.xlsx')
+    workbook_path = get_test_data_path(path)
     config_path = get_test_data_path('config.json')
     data = plugin.excel_validation.read_excel(config_path, workbook_path)
     assert data[2]['Date'] == datetime.datetime(year=2017, month=8, day=20)
