@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.2.0
+-----
+
+*   Added exclusion function for data row/columns based on filter criteria.
+    Currently only enums whitelisting is supported
+*   Expanded test cases with documents saved by MS Excel 2013
+
 0.1.2
 -----
 
