@@ -213,6 +213,17 @@ class ExcelValidationPlugin:
             if 'type' not in data_type_config:
                 data_type_config['type'] = {'base': 'automatic'}
 
+        # Set global filter properties
+        # Defensive variant is True for all options
+        if 'filter_properties' not in self.excel_config:
+            self.excel_config['filter_properties'] = {}
+        if 'excluded_fail_on_type_error' not in self.excel_config['filter_properties']:
+            self.excel_config['filter_properties']['excluded_fail_on_type_error'] = True
+        if 'excluded_fail_on_empty_cell' not in self.excel_config['filter_properties']:
+            self.excel_config['filter_properties']['excluded_fail_on_empty_cell'] = True
+        if 'excluded_enable_logging' not in self.excel_config['filter_properties']:
+            self.excel_config['filter_properties']['excluded_enable_logging'] = True
+
         ############################
         # Get the workbook and sheet
         ############################
@@ -356,6 +367,18 @@ class ExcelValidationPlugin:
             # Go through rows
             final_dict[curr_row] = {}
 
+            msg_queue = {
+                'fail_on_empty_cell': {
+                    'exceptions': [],
+                    'logs': []
+                },
+                'fail_on_type_error': {
+                    'exceptions': [],
+                    'logs': []
+                }
+            }
+            is_row_excluded = False
+
             for header in spreadsheet_headers2columns:
                 # Go through columns
                 curr_column = spreadsheet_headers2columns[header]
@@ -368,9 +391,9 @@ class ExcelValidationPlugin:
                 if value is None:
                     msg = "The '{0}' in cell {1} is empty".format(header, cell_index_str)
                     if config_header['fail_on_empty_cell']:
-                        self._raise_value_error(msg)
+                        msg_queue['fail_on_empty_cell']['exceptions'].append(msg)
                     else:
-                        self._plugin.log.warning(msg)
+                        msg_queue['fail_on_empty_cell']['logs'].append(msg)
                 else:
                     if config_header['type']['base'] == 'automatic':
                         pass
@@ -379,51 +402,72 @@ class ExcelValidationPlugin:
                             msg = 'The value {0} in cell {1} is of type {2}; required by ' \
                                   'specification is datetime'.format(value, cell_index_str, type(value))
                             if config_header['fail_on_type_error']:
-                                self._raise_value_error(msg)
+                                msg_queue['fail_on_type_error']['exceptions'].append(msg)
                             else:
-                                self._plugin.log.warning(msg)
+                                msg_queue['fail_on_type_error']['logs'].append(msg)
                     elif config_header['type']['base'] == 'enum':
+                        filtered_enum_values = []
+                        if 'filter' in config_header['type']:
+                            filtered_enum_values = config_header['type']['filter']['whitelist_values']
                         if type(value).__name__ != str_type:
                             msg = 'The value {0} in cell {1} is of type {2}; required by ' \
                                   'specification is str (enum)'.format(value, cell_index_str, type(value))
                             if config_header['fail_on_type_error']:
-                                self._raise_value_error(msg)
+                                msg_queue['fail_on_type_error']['exceptions'].append(msg)
                             else:
-                                self._plugin.log.warning(msg)
+                                msg_queue['fail_on_type_error']['logs'].append(msg)
+                            if filtered_enum_values:
+                                msg = 'Cannot apply enum filter to cell {1} because the type check failed.'
+                                self._plugin.log.error(msg)
                         else:
                             valid_values = config_header['type']['enum_values']
                             if value not in valid_values:
                                 msg = 'The value {0} in cell {1} is not contained in the given enum ' \
                                       '[{2}]'.format(value, cell_index_str, ', '.join(valid_values))
                                 if config_header['fail_on_type_error']:
-                                    self._raise_value_error(msg)
+                                    msg_queue['fail_on_type_error']['exceptions'].append(msg)
                                 else:
-                                    self._plugin.log.warning(msg)
+                                    msg_queue['fail_on_type_error']['logs'].append(msg)
+                                if filtered_enum_values:
+                                    msg = 'Cannot apply enum filter to cell {1} because the enum values check failed.'
+                                    self._plugin.log.error(msg)
+                            else:
+                                if filtered_enum_values and value not in filtered_enum_values:
+                                    is_row_excluded = True
+                                    self._plugin.log.debug("The {0} {1} was excluded due to an exclude filter on "
+                                                           "cell {2} ({3} not in [{4}]).".format(
+                                                                oriented_row_text,
+                                                                curr_row,
+                                                                cell_index_str,
+                                                                value,
+                                                                ', '.join(filtered_enum_values)))
+
                     elif config_header['type']['base'] == 'float':
+                        # TODO Allow int, too
                         if type(value) != float:
                             msg = 'The value {0} in cell {1} is of type {2}; required by ' \
                                   'specification is float'.format(value, cell_index_str, type(value))
                             if config_header['fail_on_type_error']:
-                                self._raise_value_error(msg)
+                                msg_queue['fail_on_type_error']['exceptions'].append(msg)
                             else:
-                                self._plugin.log.warning(msg)
+                                msg_queue['fail_on_type_error']['logs'].append(msg)
                         else:
                             if 'minimum' in config_header['type']:
                                 if value < config_header['type']['minimum']:
                                     msg = 'The value {0} in cell {1} is smaller than the given minimum ' \
                                           'of {2}'.format(value, cell_index_str, config_header['type']['minimum'])
                                     if config_header['fail_on_type_error']:
-                                        self._raise_value_error(msg)
+                                        msg_queue['fail_on_type_error']['exceptions'].append(msg)
                                     else:
-                                        self._plugin.log.warning(msg)
+                                        msg_queue['fail_on_type_error']['logs'].append(msg)
                             if 'maximum' in config_header['type']:
                                 if value > config_header['type']['maximum']:
                                     msg = 'The value {0} in cell {1} is greater than the given maximum ' \
                                           'of {2}'.format(value, cell_index_str, config_header['type']['maximum'])
                                     if config_header['fail_on_type_error']:
-                                        self._raise_value_error(msg)
+                                        msg_queue['fail_on_type_error']['exceptions'].append(msg)
                                     else:
-                                        self._plugin.log.warning(msg)
+                                        msg_queue['fail_on_type_error']['logs'].append(msg)
                     elif config_header['type']['base'] == 'integer':
                         # Integer values stored by Excel are returned as float (e.g. 3465.0)
                         # So we have to check if the float can be converted to int without precision loss
@@ -437,33 +481,33 @@ class ExcelValidationPlugin:
                                     msg = 'The value {0} in cell {1} is smaller than the given minimum ' \
                                           'of {2}'.format(value, cell_index_str, config_header['type']['minimum'])
                                     if config_header['fail_on_type_error']:
-                                        self._raise_value_error(msg)
+                                        msg_queue['fail_on_type_error']['exceptions'].append(msg)
                                     else:
-                                        self._plugin.log.warning(msg)
+                                        msg_queue['fail_on_type_error']['logs'].append(msg)
                             if 'maximum' in config_header['type']:
                                 if value > config_header['type']['maximum']:
                                     msg = 'The value {0} in cell {1} is greater than the given maximum ' \
                                           'of {2}'.format(value, cell_index_str, config_header['type']['maximum'])
                                     if config_header['fail_on_type_error']:
-                                        self._raise_value_error(msg)
+                                        msg_queue['fail_on_type_error']['exceptions'].append(msg)
                                     else:
-                                        self._plugin.log.warning(msg)
+                                        msg_queue['fail_on_type_error']['logs'].append(msg)
                         else:
                             msg = 'The value {0} in cell {1} is of type {2}; required by ' \
                                   'specification is int'.format(value, cell_index_str, type(value))
                             if config_header['fail_on_type_error']:
-                                self._raise_value_error(msg)
+                                msg_queue['fail_on_type_error']['exceptions'].append(msg)
                             else:
-                                self._plugin.log.warning(msg)
+                                msg_queue['fail_on_type_error']['logs'].append(msg)
 
                     elif config_header['type']['base'] == 'string':
                         if type(value).__name__ != str_type:
                             msg = 'The value {0} in cell {1} is of type {2}; required by ' \
                                   'specification is string'.format(value, cell_index_str, type(value))
                             if config_header['fail_on_type_error']:
-                                self._raise_value_error(msg)
+                                msg_queue['fail_on_type_error']['exceptions'].append(msg)
                             else:
-                                self._plugin.log.warning(msg)
+                                msg_queue['fail_on_type_error']['logs'].append(msg)
                         else:
                             if 'pattern' in config_header['type']:
                                 if re.search(config_header['type']['pattern'], value) is None:
@@ -471,11 +515,36 @@ class ExcelValidationPlugin:
                                           'given pattern {2}'.format(value, cell_index_str,
                                                                      config_header['type']['pattern'])
                                     if config_header['fail_on_type_error']:
-                                        self._raise_value_error(msg)
+                                        msg_queue['fail_on_type_error']['exceptions'].append(msg)
                                     else:
-                                        self._plugin.log.warning(msg)
+                                        msg_queue['fail_on_type_error']['logs'].append(msg)
 
                 final_dict[curr_row][header] = value
+
+            if is_row_excluded:
+                # All messages are either raised as exception or logged
+                # If at all depends on the settings in self.excel_config['filter_properties']
+
+                for msg_type, messages in msg_queue.items():
+                    for msg in messages['exceptions']:
+                        if self.excel_config['filter_properties']['excluded_' + msg_type]:
+                            # This ends the program on the first exception message
+                            self._raise_value_error(msg)
+                        elif self.excel_config['filter_properties']['excluded_enable_logging']:
+                            # In case we don't want to raise type errors as exception
+                            # we log them in case the user configured so
+                            self._plugin.log.warn(msg)
+                    for msg in messages['logs']:
+                        if self.excel_config['filter_properties']['excluded_enable_logging']:
+                            self._plugin.log.warn(msg)
+                del final_dict[curr_row]
+            else:
+                for msg_type, messages in msg_queue.items():
+                    for msg in messages['exceptions']:
+                        # This ends the program on the first exception message
+                        self._raise_value_error(msg)
+                    for msg in messages['logs']:
+                        self._plugin.log.warn(msg)
 
         return final_dict
 
