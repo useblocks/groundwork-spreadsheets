@@ -61,17 +61,17 @@
                     "fail_on_header_not_found": {"type": "boolean"},
                     "type": {
                         "oneOf": [
-                            {"$ref": "#/properties/data_type_config/definitions/automatic"},
-                            {"$ref": "#/properties/data_type_config/definitions/date"},
-                            {"$ref": "#/properties/data_type_config/definitions/enum"},
-                            {"$ref": "#/properties/data_type_config/definitions/float"},
-                            {"$ref": "#/properties/data_type_config/definitions/integer"},
-                            {"$ref": "#/properties/data_type_config/definitions/string"}
+                            {"$ref": "#/properties/data_type_config/definitions_type/automatic"},
+                            {"$ref": "#/properties/data_type_config/definitions_type/date"},
+                            {"$ref": "#/properties/data_type_config/definitions_type/enum"},
+                            {"$ref": "#/properties/data_type_config/definitions_type/float"},
+                            {"$ref": "#/properties/data_type_config/definitions_type/integer"},
+                            {"$ref": "#/properties/data_type_config/definitions_type/string"}
                         ]
                     }
                 }
             },
-            "definitions": {
+            "definitions_type": {
                 "automatic": {
                     "properties": {
                         "base": {
@@ -102,6 +102,21 @@
                                 "type": "string"
                             },
                             "uniqueItems": true
+                        },
+                        "filter": {
+                            "type": "object",
+                            "required": ["whitelist_values"],
+                            "additionalProperties": false,
+                            "properties": {
+                                "whitelist_values": {
+                                    "type": "array",
+                                    "minItems": 1,
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "uniqueItems": true
+                                }
+                            }
                         }
                     },
                     "required": ["base", "enum_values"],
@@ -144,11 +159,23 @@
                         },
                         "pattern": {
                             "type": "string"
+                        },
+                        "filter_pattern": {
+                            "type": "string"
                         }
                     },
                     "required": ["base"],
                     "additionalProperties": false
                 }
+            }
+        },
+        "filter_properties": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "excluded_enable_logging": {"type": "boolean"},
+                "excluded_fail_on_type_error": {"type": "boolean"},
+                "excluded_fail_on_empty_cell": {"type": "boolean"}
             }
         }
     }

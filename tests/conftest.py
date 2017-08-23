@@ -12,7 +12,7 @@ def emptyApp():
     :return: app
     """
     from groundwork import App
-    app = App(plugins=[], strict=True)
+    app = App(config_files=[os.path.join(os.path.dirname(__file__), 'configuration.py')], plugins=[], strict=True)
     return app
 
 
