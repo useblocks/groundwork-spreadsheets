@@ -629,12 +629,12 @@ class ExcelValidationPlugin:
         target_str = ''
         if self.excel_config['orientation'] == 'column_based':
             if column is not None:
-                target_str = openpyxl.utils.get_column_letter(column)
+                target_str = get_column_letter(column)
             if row is not None:
                 target_str += str(row)
         else:
             if row is not None:
-                target_str = openpyxl.utils.get_column_letter(row)
+                target_str = get_column_letter(row)
             if column is not None:
                 target_str += str(column)
         return target_str
