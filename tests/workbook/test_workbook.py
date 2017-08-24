@@ -5,8 +5,8 @@ from tests.conftest import EmptyPlugin, get_test_data_path
 import sys
 
 
-def test_workbook_not_exist(emptyApp):
-    plugin = EmptyPlugin(emptyApp)
+def test_workbook_not_exist(empty_app):
+    plugin = EmptyPlugin(empty_app)
     workbook_path = 'not_exist.xlsx'
     config_path = get_test_data_path('config.json')
     if sys.version.startswith('2.7'):

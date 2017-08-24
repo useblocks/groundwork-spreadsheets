@@ -9,8 +9,8 @@ import datetime
     'data_types_excel_2013.xlsx',
     'data_types_excel_2013.xlsm',
 ])
-def test_data_types(emptyApp, path):
-    plugin = EmptyPlugin(emptyApp)
+def test_data_types(empty_app, path):
+    plugin = EmptyPlugin(empty_app)
     workbook_path = get_test_data_path(path)
     config_path = get_test_data_path('config.json')
     data = plugin.excel_validation.read_excel(config_path, workbook_path)

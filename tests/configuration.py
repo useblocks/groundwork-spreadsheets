@@ -1,3 +1,7 @@
+"""
+Groundwork configuration file. Mainly needed to activate logging in the tests.
+"""
+
 import sys
 
 APP_NAME = 'TestApp'
