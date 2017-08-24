@@ -5,8 +5,8 @@ from tests.conftest import EmptyPlugin, get_test_data_path
 
 
 @pytest.mark.parametrize('orientation', ['column_based', 'row_based'])
-def test_filtering(emptyApp, caplog, orientation):
-    plugin = EmptyPlugin(emptyApp)
+def test_filtering(empty_app, caplog, orientation):
+    plugin = EmptyPlugin(empty_app)
     workbook_path = get_test_data_path(orientation + '.xlsx')
     config_path = get_test_data_path(orientation + '.json')
     data = plugin.excel_validation.read_excel(config_path, workbook_path)
@@ -25,8 +25,8 @@ def test_filtering(emptyApp, caplog, orientation):
     ('excluded_fail_on_type_error.xlsx', 'excluded_fail_on_type_error.json'),
     ('excluded_fail_on_empty_cell.xlsx', 'excluded_fail_on_empty_cell.json')
 ])
-def test_excluded_fail_on_errors(emptyApp, path, config):
-    plugin = EmptyPlugin(emptyApp)
+def test_excluded_fail_on_errors(empty_app, path, config):
+    plugin = EmptyPlugin(empty_app)
     workbook_path = get_test_data_path(path)
     config_path = get_test_data_path(config)
     with pytest.raises(ValueError):
@@ -34,8 +34,8 @@ def test_excluded_fail_on_errors(emptyApp, path, config):
 
 
 @pytest.mark.parametrize('activation_state', ['enable', 'disable'])
-def test_excluded_logging(emptyApp, caplog, activation_state):
-    plugin = EmptyPlugin(emptyApp)
+def test_excluded_logging(empty_app, caplog, activation_state):
+    plugin = EmptyPlugin(empty_app)
     workbook_path = get_test_data_path('excluded_logging.xlsx')
     config_path = get_test_data_path('excluded_' + activation_state + '_logging.json')
     data = plugin.excel_validation.read_excel(config_path, workbook_path)
