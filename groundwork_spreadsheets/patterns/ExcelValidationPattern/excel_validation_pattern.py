@@ -8,9 +8,9 @@ import re
 import sys
 
 import openpyxl
+from openpyxl.utils import get_column_letter
 from groundwork.patterns.gw_base_pattern import GwBasePattern
 from jsonschema import validate, ValidationError, SchemaError
-from openpyxl.utils import get_column_letter
 
 JSON_SCHEMA_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'assets', 'excel_config_schema.json')
 
@@ -560,8 +560,8 @@ class ExcelValidationPlugin:
     def _validate_json(self, excel_config_json_path):
 
         try:
-            with open(excel_config_json_path) as file:
-                json_obj = json.load(file)
+            with open(excel_config_json_path) as file_pointer:
+                json_obj = json.load(file_pointer)
         # the file is not deserializable as a json object
         except ValueError as exc:
             self._plugin.log.error('Malformed JSON file: {0} \n {1}'.format(excel_config_json_path, exc))
@@ -575,8 +575,8 @@ class ExcelValidationPlugin:
 
         # validate json object if schema file path is there; otherwise throw warning
         try:
-            with open(JSON_SCHEMA_FILE_PATH) as file:
-                schema_obj = json.load(file)
+            with open(JSON_SCHEMA_FILE_PATH) as file_pointer:
+                schema_obj = json.load(file_pointer)
         # the file is not deserializable as a json object
         except ValueError as exc:
             self._plugin.log.error('Malformed JSON schema file: {0} \n {1}'.format(JSON_SCHEMA_FILE_PATH, exc))
@@ -629,12 +629,12 @@ class ExcelValidationPlugin:
         target_str = ''
         if self.excel_config['orientation'] == 'column_based':
             if column is not None:
-                target_str = get_column_letter(column)
+                target_str = openpyxl.utils.get_column_letter(column)
             if row is not None:
                 target_str += str(row)
         else:
             if row is not None:
-                target_str = get_column_letter(row)
+                target_str = openpyxl.utils.get_column_letter(row)
             if column is not None:
                 target_str += str(column)
         return target_str
