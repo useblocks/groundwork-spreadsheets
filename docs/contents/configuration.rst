@@ -32,7 +32,9 @@ This is the base structure of the configuration .json file:
             {
                 "header": "Text Column",
                 "type": {
-                    "base": "string"
+                    "base": "string",
+                    "convert_numbers": true,
+                    "pattern": "^Text [0-9]$"
                 }
             },
             {
@@ -448,6 +450,7 @@ Specification::
 
     "type": {
         "base": "string",
+        "convert_numbers": <bool>,
         "pattern": "<regex_pattern>"
     }
 
@@ -458,9 +461,16 @@ The ``pattern`` will be checked using the Python re.search routine. If you would
 use the anchors ``^`` and ``$``.
 
 .. note::
-    For Python 2.7, openpyxl returns text with the 'unicode' data type.
-    For Python 3, openpyxl returns text with the 'str' data type.
-    Both are accepted by the above string type. No type conversion is done by ExcelValidationPattern.
+    Both types 'unicode' and 'str' are accepted by above string type.
+    No type conversion is done by ExcelValidationPattern.
+
+The ``convert_numbers`` field is optional.
+
+If it is **true**, the numeric types 'int', 'long' and 'float' are casted to a string using the str() routine.
+As a consequence, no type error will occur.
+
+If it is **false**, the numeric types ‘int’, ‘long’ and ‘float’ lead to a type error.
+This is helpful in situation where the type can either be a number or text.
 
 filter_properties
 -----------------

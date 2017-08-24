@@ -5,12 +5,11 @@ import datetime
 import json
 import os
 import re
-import sys
 
 import openpyxl
-from openpyxl.utils import get_column_letter
 from groundwork.patterns.gw_base_pattern import GwBasePattern
 from jsonschema import validate, ValidationError, SchemaError
+from openpyxl.utils import get_column_letter
 
 JSON_SCHEMA_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'assets', 'excel_config_schema.json')
 
@@ -300,7 +299,7 @@ class ExcelValidationPlugin:
         for header in missing_headers_in_spreadsheet:
             # Check if the fail_on_header_not_found is true
             data_type = [x for x in self.excel_config['data_type_config'] if x['header'] == header][0]
-            msg = "Config error: The header '{0}' could not be found in the spreadsheet.".format(header)
+            msg = u"Config error: The header '{0}' could not be found in the spreadsheet.".format(header)
             if data_type['fail_on_header_not_found']:
                 self._raise_value_error(msg)
             else:
@@ -309,8 +308,8 @@ class ExcelValidationPlugin:
         # Check for spreadsheet headers not found in config
         missing_headers_in_config = list(set(spreadsheet_headers) - set(config_header_dict.keys()))
         if missing_headers_in_config:
-            self._plugin.log.debug("The following spreadsheet headers are not configured for reading: {0}".format(
-                ', '.join(missing_headers_in_config)))
+            self._plugin.log.debug(u"The following spreadsheet headers are not configured for reading: {0}".format(
+                ', '.join([header.replace('\n', ' ') for header in missing_headers_in_config])))
             for header in missing_headers_in_config:
                 del spreadsheet_headers2columns[header]
 
@@ -358,19 +357,6 @@ class ExcelValidationPlugin:
         #################################################
         # Go through the rows, read and validate the data
         #################################################
-        if sys.version.startswith('2.7'):
-            str_type = 'unicode'
-        elif sys.version.startswith('3'):
-            str_type = 'str'
-        else:
-            raise RuntimeError('The enum type specification does only support Python 2.7 and 3.x')
-        if sys.version.startswith('2.7'):
-            int_type = 'long'
-        elif sys.version.startswith('3'):
-            int_type = 'int'
-        else:
-            raise RuntimeError('The integer type specification does only support Python 2.7 and 3.x')
-
         final_dict = {}
         for curr_row in range(corr_data_idx_cfg_row_first, corr_data_idx_cfg_row_last + 1):
             # Go through rows
@@ -398,7 +384,7 @@ class ExcelValidationPlugin:
                 config_header = config_header_dict[header]
 
                 if value is None:
-                    msg = "The '{0}' in cell {1} is empty".format(header, cell_index_str)
+                    msg = u"The '{0}' in cell {1} is empty".format(header, cell_index_str)
                     if config_header['fail_on_empty_cell']:
                         msg_queue['fail_on_empty_cell']['exceptions'].append(msg)
                     else:
@@ -407,9 +393,9 @@ class ExcelValidationPlugin:
                     if config_header['type']['base'] == 'automatic':
                         pass
                     elif config_header['type']['base'] == 'date':
-                        if type(value) != datetime.datetime:
-                            msg = 'The value {0} in cell {1} is of type {2}; required by ' \
-                                  'specification is datetime'.format(value, cell_index_str, type(value))
+                        if not isinstance(value, datetime.datetime):
+                            msg = u'The value {0} in cell {1} is of type {2}; required by ' \
+                                  u'specification is datetime'.format(value, cell_index_str, type(value))
                             if config_header['fail_on_type_error']:
                                 msg_queue['fail_on_type_error']['exceptions'].append(msg)
                             else:
@@ -418,9 +404,9 @@ class ExcelValidationPlugin:
                         filtered_enum_values = []
                         if 'filter' in config_header['type']:
                             filtered_enum_values = config_header['type']['filter']['whitelist_values']
-                        if type(value).__name__ != str_type:
-                            msg = 'The value {0} in cell {1} is of type {2}; required by ' \
-                                  'specification is str (enum)'.format(value, cell_index_str, type(value))
+                        if not self._is_string(value):
+                            msg = u'The value {0} in cell {1} is of type {2}; required by ' \
+                                  u'specification is a string type (enum)'.format(value, cell_index_str, type(value))
                             if config_header['fail_on_type_error']:
                                 msg_queue['fail_on_type_error']['exceptions'].append(msg)
                             else:
@@ -431,8 +417,8 @@ class ExcelValidationPlugin:
                         else:
                             valid_values = config_header['type']['enum_values']
                             if value not in valid_values:
-                                msg = 'The value {0} in cell {1} is not contained in the given enum ' \
-                                      '[{2}]'.format(value, cell_index_str, ', '.join(valid_values))
+                                msg = u'The value {0} in cell {1} is not contained in the given enum ' \
+                                      u'[{2}]'.format(value, cell_index_str, ', '.join(valid_values))
                                 if config_header['fail_on_type_error']:
                                     msg_queue['fail_on_type_error']['exceptions'].append(msg)
                                 else:
@@ -443,8 +429,8 @@ class ExcelValidationPlugin:
                             else:
                                 if filtered_enum_values and value not in filtered_enum_values:
                                     is_row_excluded = True
-                                    self._plugin.log.debug("The {0} {1} was excluded due to an exclude filter on "
-                                                           "cell {2} ({3} not in [{4}]).".format(
+                                    self._plugin.log.debug(u"The {0} {1} was excluded due to an exclude filter on "
+                                                           u"cell {2} ({3} not in [{4}]).".format(
                                                                oriented_row_text,
                                                                curr_row,
                                                                cell_index_str,
@@ -453,9 +439,9 @@ class ExcelValidationPlugin:
 
                     elif config_header['type']['base'] == 'float':
                         # TODO Allow int, too
-                        if type(value) != float:
-                            msg = 'The value {0} in cell {1} is of type {2}; required by ' \
-                                  'specification is float'.format(value, cell_index_str, type(value))
+                        if not isinstance(value, float):
+                            msg = u'The value {0} in cell {1} is of type {2}; required by ' \
+                                  u'specification is float'.format(value, cell_index_str, type(value))
                             if config_header['fail_on_type_error']:
                                 msg_queue['fail_on_type_error']['exceptions'].append(msg)
                             else:
@@ -463,16 +449,16 @@ class ExcelValidationPlugin:
                         else:
                             if 'minimum' in config_header['type']:
                                 if value < config_header['type']['minimum']:
-                                    msg = 'The value {0} in cell {1} is smaller than the given minimum ' \
-                                          'of {2}'.format(value, cell_index_str, config_header['type']['minimum'])
+                                    msg = u'The value {0} in cell {1} is smaller than the given minimum ' \
+                                          u'of {2}'.format(value, cell_index_str, config_header['type']['minimum'])
                                     if config_header['fail_on_type_error']:
                                         msg_queue['fail_on_type_error']['exceptions'].append(msg)
                                     else:
                                         msg_queue['fail_on_type_error']['logs'].append(msg)
                             if 'maximum' in config_header['type']:
                                 if value > config_header['type']['maximum']:
-                                    msg = 'The value {0} in cell {1} is greater than the given maximum ' \
-                                          'of {2}'.format(value, cell_index_str, config_header['type']['maximum'])
+                                    msg = u'The value {0} in cell {1} is greater than the given maximum ' \
+                                          u'of {2}'.format(value, cell_index_str, config_header['type']['maximum'])
                                     if config_header['fail_on_type_error']:
                                         msg_queue['fail_on_type_error']['exceptions'].append(msg)
                                     else:
@@ -480,39 +466,45 @@ class ExcelValidationPlugin:
                     elif config_header['type']['base'] == 'integer':
                         # Integer values stored by Excel are returned as float (e.g. 3465.0)
                         # So we have to check if the float can be converted to int without precision loss
-                        if type(value) == float:
+                        if isinstance(value, float):
                             if value.is_integer():
+                                # the typecast to int may return int or long, depending on the size of value
                                 value = int(value)
-                        # For Python 2.7, openpyxl returns a long type
-                        if type(value).__name__ == int_type:
+                        if self._is_type_int_long(value):
                             if 'minimum' in config_header['type']:
                                 if value < config_header['type']['minimum']:
-                                    msg = 'The value {0} in cell {1} is smaller than the given minimum ' \
-                                          'of {2}'.format(value, cell_index_str, config_header['type']['minimum'])
+                                    msg = u'The value {0} in cell {1} is smaller than the given minimum ' \
+                                          u'of {2}'.format(value, cell_index_str, config_header['type']['minimum'])
                                     if config_header['fail_on_type_error']:
                                         msg_queue['fail_on_type_error']['exceptions'].append(msg)
                                     else:
                                         msg_queue['fail_on_type_error']['logs'].append(msg)
                             if 'maximum' in config_header['type']:
                                 if value > config_header['type']['maximum']:
-                                    msg = 'The value {0} in cell {1} is greater than the given maximum ' \
-                                          'of {2}'.format(value, cell_index_str, config_header['type']['maximum'])
+                                    msg = u'The value {0} in cell {1} is greater than the given maximum ' \
+                                          u'of {2}'.format(value, cell_index_str, config_header['type']['maximum'])
                                     if config_header['fail_on_type_error']:
                                         msg_queue['fail_on_type_error']['exceptions'].append(msg)
                                     else:
                                         msg_queue['fail_on_type_error']['logs'].append(msg)
                         else:
-                            msg = 'The value {0} in cell {1} is of type {2}; required by ' \
-                                  'specification is int'.format(value, cell_index_str, type(value))
+                            msg = u'The value {0} in cell {1} is of type {2}; required by ' \
+                                  u'specification is int'.format(value, cell_index_str, type(value))
                             if config_header['fail_on_type_error']:
                                 msg_queue['fail_on_type_error']['exceptions'].append(msg)
                             else:
                                 msg_queue['fail_on_type_error']['logs'].append(msg)
 
                     elif config_header['type']['base'] == 'string':
-                        if type(value).__name__ != str_type:
-                            msg = 'The value {0} in cell {1} is of type {2}; required by ' \
-                                  'specification is string'.format(value, cell_index_str, type(value))
+                        if self._is_type_numeric(value):
+                            convert_numbers = False
+                            if 'convert_numbers' in config_header['type']:
+                                convert_numbers = config_header['type']['convert_numbers']
+                            if convert_numbers:
+                                value = str(value)
+                        if not self._is_string(value):
+                            msg = u'The value {0} in cell {1} is of type {2}; required by ' \
+                                  u'specification is string'.format(value, cell_index_str, type(value))
                             if config_header['fail_on_type_error']:
                                 msg_queue['fail_on_type_error']['exceptions'].append(msg)
                             else:
@@ -520,9 +512,9 @@ class ExcelValidationPlugin:
                         else:
                             if 'pattern' in config_header['type']:
                                 if re.search(config_header['type']['pattern'], value) is None:
-                                    msg = 'The value {0} in cell {1} does not follow the ' \
-                                          'given pattern {2}'.format(value, cell_index_str,
-                                                                     config_header['type']['pattern'])
+                                    msg = u'The value {0} in cell {1} does not follow the ' \
+                                          u'given pattern {2}'.format(value, cell_index_str,
+                                                                      config_header['type']['pattern'])
                                     if config_header['fail_on_type_error']:
                                         msg_queue['fail_on_type_error']['exceptions'].append(msg)
                                     else:
@@ -556,6 +548,60 @@ class ExcelValidationPlugin:
                         self._plugin.log.warn(msg)
 
         return final_dict
+
+    @staticmethod
+    def _is_string(value):
+        """
+        Tests if a value is of a string type
+        Python2: unicode, str
+        Python3: str
+
+        :param value: Variable of any type
+        :return: True if value is of string type else false
+        """
+        try:
+            str_type = basestring
+        except NameError:
+            str_type = str
+        return isinstance(value, str_type)
+
+    @staticmethod
+    def _is_type_numeric(value):
+        """
+        Tests if a value is of an numeric type.
+        Python2: int, long, float
+        Python3: int, float
+
+        :param value: Variable of any type
+        :return: True if value is of integer type else false
+        """
+        numeric_types = (int, float)
+        try:
+            long
+            numeric_types = (int, long, float)
+        except NameError:
+            pass
+
+        return isinstance(value, numeric_types)
+
+    @staticmethod
+    def _is_type_int_long(value):
+        """
+        Tests if a value is of an integer type.
+        Python2: int, long
+        Python3: int
+
+        :param value: Variable of any type
+        :return: True if value is of integer type else false
+        """
+        numeric_types = (int)
+        try:
+            long
+            numeric_types = (int, long)
+        except NameError:
+            pass
+
+        return isinstance(value, numeric_types)
 
     def _validate_json(self, excel_config_json_path):
 
