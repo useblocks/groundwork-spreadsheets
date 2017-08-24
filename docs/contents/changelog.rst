@@ -1,11 +1,20 @@
 Changelog
 =========
 
+0.3.0
+-----
+
+*   Added 'convert_numbers' key to string type.
+    This accepts numbers for string types too.
+*   Added coveralls.io supprt
+*   Added scrutinizer-ci.com support
+*   Fixed pylint issues
+
 0.2.0
 -----
 
 *   Added exclusion function for data row/columns based on filter criteria.
-    Currently only enums whitelisting is supported
+    Currently only enums whitelisting is supported.
 *   Expanded test cases with documents saved by MS Excel 2013
 
 0.1.2
