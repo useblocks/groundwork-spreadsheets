@@ -157,9 +157,8 @@
                         "base": {
                             "enum": ["string"]
                         },
-                        "pattern": {
-                            "type": "string"
-                        },
+                        "convert_numbers": {"type": "boolean"},
+                        "pattern": {"type": "string"},
                         "filter_pattern": {
                             "type": "string"
                         }
