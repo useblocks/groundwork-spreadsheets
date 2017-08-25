@@ -667,7 +667,7 @@ class ExcelValidationPlugin:
 
     def _raise_value_error(self, msg):
         self._plugin.log.error(msg)
-        raise ValueError(msg)
+        raise ValueError(msg.encode('UTF-8', 'ignore'))
 
     def _transform_coordinates(self, row=None, column=None):
         if row is None and column is None:
