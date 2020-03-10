@@ -1,0 +1,40 @@
+[tool.poetry]
+name = "groundwork_spreadsheets"
+version = "0.3.0"
+description = "Patterns for reading writing spreadsheet documents"
+license = "MIT license"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 2",
+    "Programming Language :: Python :: 2.7",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.4",
+    "Programming Language :: Python :: 3.5",
+    "Programming Language :: Python :: 3.6"
+    ]
+authors = ["team useblocks <groundwork@useblocks.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.6"
+groundwork = ">=0.1.10"
+jsonschema = "*"
+openpyxl = "*"
+
+[tool.poetry.dev-dependencies]
+# documentation
+sphinx = "*"
+sphinxcontrib-plantuml = "*"
+groundwork-sphinx-theme = "*"
+
+# testing
+pytest = "*"
+pytest-cov = "*"
+tox = "*"
+
+# linters / formatting
+flake8 = "3.5.0"

@@ -16,9 +16,9 @@ def test_filtering(empty_app, caplog, orientation):
     assert 4 in data
     assert data[4]['Enum'] == 'cat'
     if orientation == 'column_based':
-        assert 'The row 3 was excluded due to an exclude filter on cell B3 (dog not in [ape, cat])' in caplog.text()
+        assert 'The row 3 was excluded due to an exclude filter on cell B3 (dog not in [ape, cat])' in caplog.text
     else:
-        assert 'The column 3 was excluded due to an exclude filter on cell C2 (dog not in [ape, cat])' in caplog.text()
+        assert 'The column 3 was excluded due to an exclude filter on cell C2 (dog not in [ape, cat])' in caplog.text
 
 
 @pytest.mark.parametrize('path, config', [
@@ -44,7 +44,7 @@ def test_excluded_logging(empty_app, caplog, activation_state):
     assert 3 not in data
     assert 4 in data
     assert data[4]['Enum'] == 'cat'
-    assert 'The row 3 was excluded due to an exclude filter on cell B3 (dog not in [ape, cat])' in caplog.text()
+    assert 'The row 3 was excluded due to an exclude filter on cell B3 (dog not in [ape, cat])' in caplog.text
 
     if sys.version.startswith('2.7'):
         str_type = 'unicode'
@@ -59,8 +59,8 @@ def test_excluded_logging(empty_app, caplog, activation_state):
            "is datetime".format(type_class, str_type)
     msg2 = "The 'Text' in cell E3 is empty"
     if activation_state == 'enable':
-        assert msg1 in caplog.text()
-        assert msg2 in caplog.text()
+        assert msg1 in caplog.text
+        assert msg2 in caplog.text
     else:
-        assert msg1 not in caplog.text()
-        assert msg2 not in caplog.text()
+        assert msg1 not in caplog.text
+        assert msg2 not in caplog.text

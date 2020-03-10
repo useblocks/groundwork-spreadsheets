@@ -77,9 +77,6 @@ Here is how an example json config file looks like::
     }
 
 """
-from setuptools import setup, find_packages
-import re
-import ast
 
 _version_re = re.compile(r'__version__\s+=\s+(.*)')
 with open('groundwork_spreadsheets/version.py', 'rb') as f:

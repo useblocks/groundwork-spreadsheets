@@ -1,7 +1,0 @@
-pytest
-pytest-runner
-pytest-flake8
-pytest-capturelog
-coverage
-python-coveralls
-tox
