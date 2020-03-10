@@ -606,7 +606,7 @@ class ExcelValidationPlugin:
     def _validate_json(self, excel_config_json_path):
 
         try:
-            with open(excel_config_json_path) as file_pointer:
+            with open(excel_config_json_path, encoding='utf-8') as file_pointer:
                 json_obj = json.load(file_pointer)
         # the file is not deserializable as a json object
         except ValueError as exc:
