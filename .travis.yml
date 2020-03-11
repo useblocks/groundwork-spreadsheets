@@ -4,24 +4,24 @@ os:
 language: python
 matrix:
   include:
-    - python: 3.6
-      env: TOXENV=py36
-    - python: 3.7
-      env: TOXENV=py37,flake8
-    - python: 3.8
-      env: TOXENV=py38
+  - python: 3.6
+    env: TOXENV=py36
+  - python: 3.7
+    env: TOXENV=py37,flake8
+  - python: 3.8
+    env: TOXENV=py38
 before_install:
-  - pip install poetry
+- pip install poetry
 install:
 - pip install --upgrade pip setuptools
 - pip install tox-travis
 script: tox
+before_deploy: poetry config pypi-token.pypi $PYPI_TOKEN_GROUNDWORK_SPREADSHEETS
 deploy:
-  provider: pypi
-  user: ub_marco
-  password:
-    secure: NJqy6Wz1F3UqoFgTFvGVAH/fI+wRXvZdoLDbmYwJnmfCo4MBoReoRy1Wd9T4xNxl4HZqd01pfDGZxdUTdmeucreKpB1ixDhyOGQIw2x0+Cd5M6hSU3c/bm8JBGq+a1ejyU4GqcZSt+UHoDS4V8OYahIeHgqvwiZbxa88YjjXI5q9tQevvCp3vIaFy7Q6loPdWib1tmzQ3XGppSm6Tbkl9hWaRyH0tc4HWL//NjrLGXwKPeluQ3H3kWUHY95pPNDKaF+qZF8brH8+gw06nDTr4ANh90ZXfv7Ue3airX7BwZO9jrBwz6vB10ngzfZJHJrjxJ0wwBr6tG/OvfxoDwUCVT1iE1OhvribQpHRimbDlOtYRoaWBVzlro5UI1e5O722u1AC1i1v+p3AUtAcYriCzWbj0n6HjDI/ilulYA/AUkzIiZMogIK+slciouChSD2PqwMkycqm/xPQ+BdVl5t+LhQXb3BNELEywyrX2ANkoF2H+1KDQLBr7DO+YFbLlBdE8kPJpCsiHao9PeDRTU0ClxMo2QsKAFGZp7YzG2hhFrM1RXh2VSxTFfcxL1P8EWlmbU3gUcKV9nKgZZEbf//3V9GO66yYBigU6W4x8X5N8cK3nNvtDjANGb+pAFkSaU4wbgqO80K70B9bQUYx2M6upIZG3PIBmsFRpjKT702CUgY=
+  provider: script
+  script: poetry publish --build
   on:
     tags: true
-    distributions: sdist bdist_wheel
-    repo: useblocks/groundwork-spreadsheets
+env:
+  global:
+    secure: U19FuddUNceMdP6A3ph7NxgCYp9MCn4h0p+zseC6Da2Yz9lXHhf/4kTeHt1k7aaslpmgAB3a+AgB7ldQNDFebyHafIznp6Br1+UNksfhs9uvMsnbTmvg1At0l1U+xzBTlce3ZMr9q06GhdK6HpVwEL95F2I40zRGsRnl4HIjV6JtEcHMFLfpPBV8ejI0PEptAxqfF7ARPVVo7TUa1VX1yfDZvp2uVwdfsVoC/oemNk8Riou9/VBA0vSzL+IHSw7GqZ+po7gT8JX/M3hSd+29zJyj2/XX9kjfNYM1qW+dm6OpL7Ht0E9QHaM+CNFVlKGzU3cwubN6HyvJ127blkF6Sj7X3HmQ8V3xgtgZeY4shBIb7iZxbNyRwCFgdsesxezVbZN508APmuxRu6XRYdpwx+pqTXHemvNg+cEtmyJPYX6nKmV1ANE1mJwxKgon618g/oBjCNQ0TO+GbGij9sdebb/IpjwUW19UFtGFaeddtLtuw31ECP43/2ioxv4nT6TWYex8h3JReEzKPTIXYSyBmE/mpRW8/5a6suuTLuVwTaXm5kF6zPuZqSBKiNhT/pyg1RJcgrmnX8D6iD5nRi/wLyB3ZPLloaDvsBOD4fiVdNyZs4nYhIFIJNU1QpzxfBBVxlR6SWzfP3Y7c3iJBQcUK0H+oSc2ZPnykPfCGAPVjz8=

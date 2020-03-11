@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.4.0
+0.4.3
 -----
 
 *   Fixed a encoding issue on Windows when reading the JSON config file (set to UTF-8)

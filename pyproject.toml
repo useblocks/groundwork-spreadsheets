@@ -1,6 +1,6 @@
 [tool.poetry]
 name = 'groundwork_spreadsheets'
-version = '0.4.0'
+version = '0.4.3'
 description = 'Patterns for reading writing spreadsheet documents'
 authors = [
     'Marco Heinemann <marco.heinemann@useblocks.com>',
@@ -12,7 +12,7 @@ homepage = 'https://pypi.org/project/groundwork-spreadsheets/'
 repository = 'https://github.com/useblocks/groundwork-spreadsheets'
 documentation = 'https://groundwork-spreadsheets.readthedocs.io/en/latest'
 classifiers = [
-    'Development Status :: 3 - Alpha',
+    'Development Status :: 5 - Production/Stable',
     'Intended Audience :: Developers',
     'License :: OSI Approved :: MIT License',
     'Operating System :: OS Independent',
