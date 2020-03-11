@@ -1,6 +1,14 @@
 Changelog
 =========
 
+0.4.0
+-----
+
+*   Fixed a encoding issue on Windows when reading the JSON config file (set to UTF-8)
+*   Migrated from setuptools (setup.py) to poetry (pyproject.toml)
+*   Removed py27 compatibility (only 3.6, 3.7 and 3.8 are supported now)
+*   Fixed Travis CI
+
 0.3.0
 -----
 
