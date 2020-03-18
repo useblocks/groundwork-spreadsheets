@@ -1,6 +1,6 @@
 [tool.poetry]
 name = 'groundwork_spreadsheets'
-version = '0.4.3'
+version = '0.4.4'
 description = 'Patterns for reading writing spreadsheet documents'
 authors = [
     'Marco Heinemann <marco.heinemann@useblocks.com>',

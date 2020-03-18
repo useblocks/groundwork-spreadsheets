@@ -1,6 +1,11 @@
 Changelog
 =========
 
+0.4.4
+-----
+
+*   Fixed importlib (__init__.py) compatibility with pyinstaller
+
 0.4.3
 -----
 
